@@ -1,0 +1,14 @@
+{
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "javascript.referencesCodeLens.enabled": true,
+  "typescript.referencesCodeLens.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  }
+}
