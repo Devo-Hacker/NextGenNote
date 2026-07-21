@@ -1,35 +1,58 @@
 const Note = require('../models/Note');
 
-// CREATE
 exports.createNote = async (req, res) => {
   try {
-    const { title, content, isAIGenerated, mood } = req.body;
-
+    const { title, content, isAIGenerated, mood, isArchived } = req.body;
     const note = await Note.create({
       userId: req.userId,
       title,
       content,
       isAIGenerated: isAIGenerated || false,
       mood: mood || null,
+      isArchived: isArchived || false,
     });
-
     res.status(201).json(note);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
-// GET ALL (for logged-in user)
 exports.getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ userId: req.userId }).sort({ isPinned: -1, updatedAt: -1 });
+    const { filter } = req.query;
+    let query = { userId: req.userId };
+
+    if (filter === 'starred') {
+      query = { ...query, isPinned: true, isDeleted: false, isArchived: false };
+    } else if (filter === 'archive') {
+      query = { ...query, isArchived: true, isDeleted: false };
+    } else if (filter === 'trash') {
+      query = { ...query, isDeleted: true };
+    } else {
+      query = { ...query, isDeleted: false, isArchived: false };
+    }
+
+    const notes = await Note.find(query).sort({ isPinned: -1, updatedAt: -1 });
     res.status(200).json(notes);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
-// GET SINGLE
+exports.getCounts = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const [starred, archive, trash] = await Promise.all([
+      Note.countDocuments({ userId, isPinned: true, isDeleted: false, isArchived: false }),
+      Note.countDocuments({ userId, isArchived: true, isDeleted: false }),
+      Note.countDocuments({ userId, isDeleted: true }),
+    ]);
+    res.status(200).json({ starred, archive, trash });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 exports.getNoteById = async (req, res) => {
   try {
     const note = await Note.findOne({ _id: req.params.id, userId: req.userId });
@@ -40,17 +63,18 @@ exports.getNoteById = async (req, res) => {
   }
 };
 
-// UPDATE
 exports.updateNote = async (req, res) => {
   try {
-    const { title, content, isPinned } = req.body;
+    const { title, content } = req.body;
+    const updateFields = {};
+    if (title !== undefined) updateFields.title = title;
+    if (content !== undefined) updateFields.content = content;
 
     const note = await Note.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      { title, content, isPinned },
+      updateFields,
       { new: true }
     );
-
     if (!note) return res.status(404).json({ message: 'Note not found' });
     res.status(200).json(note);
   } catch (err) {
@@ -58,12 +82,74 @@ exports.updateNote = async (req, res) => {
   }
 };
 
-// DELETE
+exports.togglePin = async (req, res) => {
+  try {
+    const note = await Note.findOne({ _id: req.params.id, userId: req.userId });
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+    note.isPinned = !note.isPinned;
+    await note.save();
+    res.status(200).json(note);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.archiveNote = async (req, res) => {
+  try {
+    const note = await Note.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      { isArchived: true, isPinned: false },
+      { new: true }
+    );
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+    res.status(200).json(note);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.restoreNote = async (req, res) => {
+  try {
+    const note = await Note.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      { isArchived: false, isDeleted: false },
+      { new: true }
+    );
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+    res.status(200).json(note);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 exports.deleteNote = async (req, res) => {
   try {
-    const note = await Note.findOneAndDelete({ _id: req.params.id, userId: req.userId });
+    const note = await Note.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      { isDeleted: true, isPinned: false },
+      { new: true }
+    );
     if (!note) return res.status(404).json({ message: 'Note not found' });
-    res.status(200).json({ message: 'Note deleted' });
+    res.status(200).json({ message: 'Note moved to trash' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.hardDeleteNote = async (req, res) => {
+  try {
+    const note = await Note.findOneAndDelete({ _id: req.params.id, userId: req.userId, isDeleted: true });
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+    res.status(200).json({ message: 'Note permanently deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.emptyTrash = async (req, res) => {
+  try {
+    await Note.deleteMany({ userId: req.userId, isDeleted: true });
+    res.status(200).json({ message: 'Trash emptied' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

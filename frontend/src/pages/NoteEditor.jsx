@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Sparkles } from 'lucide-react';
-import { getNoteById, updateNote } from '../api/notes';
+import { getNoteById, updateNote, archiveNote } from '../api/notes';
 
 const NoteEditor = () => {
   const { id } = useParams();
@@ -42,6 +42,19 @@ const NoteEditor = () => {
     }
   };
 
+  const handleSaveToArchive = async () => {
+    setSaving(true);
+    try {
+      await updateNote(id, { title, content });
+      await archiveNote(id);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Failed to archive note', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleBack = async () => {
     await handleSave();
     navigate('/dashboard');
@@ -75,6 +88,13 @@ const NoteEditor = () => {
                 AI Generated
               </span>
             )}
+            <button
+              onClick={handleSaveToArchive}
+              disabled={saving}
+              className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-4 py-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
+            >
+              Save to Archive
+            </button>
             <button
               onClick={handleSave}
               disabled={saving}
