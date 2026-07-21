@@ -1,6 +1,9 @@
 import api from './axios';
 
-export const getNotes = (filter = 'all') => api.get(`/notes?filter=${filter}`);
+export const getNotes = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return api.get(`/notes?${query}`);
+};
 export const getNoteCounts = () => api.get('/notes/counts');
 export const getNoteById = (id) => api.get(`/notes/${id}`);
 export const createNote = (data) => api.post('/notes', data);

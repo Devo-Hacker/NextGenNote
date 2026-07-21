@@ -29,10 +29,12 @@ exports.createNote = async (req, res) => {
 
 exports.getNotes = async (req, res) => {
   try {
-    const { filter } = req.query;
+    const { filter, collectionId } = req.query;
     let query = { userId: req.userId };
 
-    if (filter === 'starred') {
+    if (collectionId) {
+      query = { ...query, collectionId, isDeleted: false, isArchived: false };
+    } else if (filter === 'starred') {
       query = { ...query, isPinned: true, isDeleted: false, isArchived: false };
     } else if (filter === 'archive') {
       query = { ...query, isArchived: true, isDeleted: false };
@@ -44,6 +46,21 @@ exports.getNotes = async (req, res) => {
 
     const notes = await Note.find(query).sort({ isPinned: -1, updatedAt: -1 });
     res.status(200).json(notes);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.setNoteCollection = async (req, res) => {
+  try {
+    const { collectionId } = req.body;
+    const note = await Note.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      { collectionId: collectionId || null },
+      { new: true }
+    );
+    if (!note) return res.status(404).json({ message: 'Note not found' });
+    res.status(200).json(note);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

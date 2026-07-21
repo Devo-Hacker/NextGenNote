@@ -2,19 +2,10 @@ const express = require('express');
 const router = express.Router();
 const protect = require('../middleware/authMiddleware');
 const {
-  createNote,
-  getNotes,
-  getCounts,
-  getNoteById,
-  updateNote,
-  togglePin,
-  archiveNote,
-  restoreNote,
-  deleteNote,
-  hardDeleteNote,
-  emptyTrash,
+  createNote, getNotes, getCounts, getNoteById, updateNote,
+  togglePin, archiveNote, restoreNote, deleteNote, hardDeleteNote,
+  emptyTrash, setNoteCollection,
 } = require('../controllers/noteController');
-
 router.use(protect);
 
 router.post('/', createNote);
@@ -29,5 +20,6 @@ router.patch('/:id/archive', archiveNote);
 router.patch('/:id/restore', restoreNote);
 router.delete('/:id/permanent', hardDeleteNote);
 router.delete('/:id', deleteNote);
+router.patch('/:id/collection', setNoteCollection);
 
 module.exports = router;
