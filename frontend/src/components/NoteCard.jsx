@@ -30,38 +30,38 @@ const NoteCard = ({ note, view, onClick, onEdit, onPin, onArchive, onRestore, on
   return (
     <div
       onClick={() => onClick(note)}
-      className="relative bg-white border border-gray-200 rounded-xl p-5 cursor-pointer hover:shadow-md transition-shadow flex flex-col justify-between min-h-[220px]"
+      className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 cursor-pointer hover:shadow-md transition-shadow flex flex-col justify-between min-h-[220px]"
     >
       <div>
         <div className="flex items-start justify-between mb-2 gap-2">
-          <h3 className="font-semibold text-gray-900">{note.title || 'Untitled'}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{note.title || 'Untitled'}</h3>
           <div className="flex items-center gap-1 shrink-0">
             {note.isPinned && <Pin size={12} className="text-amber-500 fill-amber-500" />}
             {note.isAIGenerated && (
-              <span className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+              <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/40 px-2 py-0.5 rounded-full">
                 <Sparkles size={12} />
                 AI
               </span>
             )}
           </div>
         </div>
-        <p className="text-sm text-gray-500 line-clamp-4">{note.content || 'No content yet...'}</p>
-        {note.mood && <span className="text-xs text-gray-400 mt-1 block">{note.mood}</span>}
+        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-4">{note.content || 'No content yet...'}</p>
+        {note.mood && <span className="text-xs text-gray-400 dark:text-gray-500 mt-1 block">{note.mood}</span>}
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-        <span className="text-xs text-gray-400">{timeAgo(note.updatedAt)}</span>
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+        <span className="text-xs text-gray-400 dark:text-gray-500">{timeAgo(note.updatedAt)}</span>
 
         <div className="relative" ref={menuRef}>
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen((prev) => !prev); }}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <MoreVertical size={16} />
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 bottom-7 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-40 z-10">
+            <div className="absolute right-0 bottom-7 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 w-40 z-10">
               {view !== 'trash' && view !== 'archive' && (
                 <>
                   <MenuItem icon={<Pencil size={14} />} label="Edit" onClick={close(onEdit)} />
@@ -89,7 +89,9 @@ const NoteCard = ({ note, view, onClick, onEdit, onPin, onArchive, onRestore, on
 const MenuItem = ({ icon, label, onClick, danger }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 ${danger ? 'text-red-500' : 'text-gray-700'}`}
+    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 ${
+      danger ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'
+    }`}
   >
     {icon}
     {label}

@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { LogOut, User } from 'lucide-react';
 import { AuthContext } from '../context/AuthContextStore';
+import { getMe } from '../api/user';
+import { AVATARS } from '../constants/avatars';
 
 const ProfileMenu = () => {
   const { user, logout } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
+  const [avatar, setAvatar] = useState('fox');
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -15,15 +18,25 @@ const ProfileMenu = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const initial = user?.name?.charAt(0).toUpperCase() || '?';
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      try {
+        const res = await getMe();
+        setAvatar(res.data.avatar);
+      } catch (err) {
+        console.error('Failed to fetch avatar', err);
+      }
+    };
+    fetchAvatar();
+  }, []);
 
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-semibold hover:bg-purple-700 transition-colors"
+        className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-lg hover:bg-purple-200 transition-colors"
       >
-        {initial}
+        {AVATARS[avatar] || '🦊'}
       </button>
 
       {open && (

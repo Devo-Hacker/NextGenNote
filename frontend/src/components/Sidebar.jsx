@@ -4,12 +4,14 @@ import {
   PanelLeft, PanelLeftClose,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({
   activeView, onViewChange, counts, recentNotes, onOpenRecent,
   collapsed, onToggleCollapse, notificationCount, onNotificationsClick,
 }) => {
   const [workspaceOpen, setWorkspaceOpen] = useState(true);
+  const navigate = useNavigate();
 
   return (
     <aside
@@ -51,7 +53,12 @@ const Sidebar = ({
           collapsed={collapsed}
           onClick={onNotificationsClick}
         />
-        <SidebarLink icon={<Settings size={16} />} label="Settings" collapsed={collapsed} />
+        <SidebarLink
+          icon={<Settings size={16} />}
+          label="Settings"
+          collapsed={collapsed}
+          onClick={() => navigate('/settings')}
+        />
       </div>
 
       {!collapsed && (

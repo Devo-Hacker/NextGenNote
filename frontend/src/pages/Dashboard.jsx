@@ -7,6 +7,7 @@ import {
   togglePinNote, archiveNote, restoreNote,
   deleteNote, hardDeleteNote, emptyTrash,
 } from '../api/notes';
+import { getMe } from '../api/user';
 import Sidebar from '../components/Sidebar';
 import NoteCard from '../components/NoteCard';
 import NewNoteCard from '../components/NewNoteCard';
@@ -41,6 +42,7 @@ const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [greeting, setGreeting] = useState('Hola');
   const navigate = useNavigate();
 
   const fetchNotes = async (view) => {
@@ -73,6 +75,15 @@ const Dashboard = () => {
     }
   };
 
+  const fetchGreeting = async () => {
+    try {
+      const res = await getMe();
+      setGreeting(res.data.dashboardGreeting);
+    } catch (err) {
+      console.error('Failed to fetch greeting', err);
+    }
+  };
+
   const refresh = () => {
     fetchNotes(activeView);
     fetchCounts();
@@ -84,6 +95,10 @@ const Dashboard = () => {
     fetchCounts();
     fetchNotifications();
   }, [activeView]);
+
+  useEffect(() => {
+    fetchGreeting();
+  }, []);
 
   const addToRecent = (note) => {
     setRecentNotes((prev) => {
@@ -180,7 +195,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Sidebar
         activeView={activeView}
         onViewChange={setActiveView}
@@ -205,7 +220,7 @@ const Dashboard = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">{VIEW_LABELS[activeView]}</h1>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{VIEW_LABELS[activeView]}</h1>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setAiCanvasOpen((prev) => !prev)}
@@ -218,24 +233,24 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <p className="text-gray-500 mb-4">Hola {user?.name} 👋</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">{greeting} {user?.name} 👋</p>
 
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 mb-6">
-            <Search size={16} className="text-gray-400" />
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 mb-6">
+            <Search size={16} className="text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search something or use AI"
-              className="flex-1 outline-none text-sm text-gray-700 placeholder-gray-400"
+              className="flex-1 outline-none text-sm text-gray-700 dark:text-white bg-transparent placeholder-gray-400 dark:placeholder-gray-500"
             />
-            <Clock size={16} className="text-gray-400" />
+            <Clock size={16} className="text-gray-400 dark:text-gray-500" />
           </div>
 
           {activeView === 'trash' && counts.trash > 0 && (
             <button
               onClick={() => setEmptyTrashOpen(true)}
-              className="flex items-center gap-1.5 text-sm text-red-500 border border-red-200 rounded-lg px-3 py-1.5 hover:bg-red-50 mb-6"
+              className="flex items-center gap-1.5 text-sm text-red-500 border border-red-200 dark:border-red-900 rounded-lg px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950 mb-6"
             >
               <Trash2 size={14} />
               Permanently delete all
@@ -243,7 +258,7 @@ const Dashboard = () => {
           )}
 
           {loading ? (
-            <p className="text-gray-400">Loading notes...</p>
+            <p className="text-gray-400 dark:text-gray-500">Loading notes...</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {activeView === 'all' && !searchQuery && <NewNoteCard onClick={handleCreate} />}
@@ -261,7 +276,7 @@ const Dashboard = () => {
                 />
               ))}
               {filteredNotes.length === 0 && (
-                <p className="text-gray-400 text-sm col-span-full text-center py-8">
+                <p className="text-gray-400 dark:text-gray-500 text-sm col-span-full text-center py-8">
                   {searchQuery ? `No notes match "${searchQuery}"` : `Nothing in ${VIEW_LABELS[activeView]} yet`}
                 </p>
               )}
