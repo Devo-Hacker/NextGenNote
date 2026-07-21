@@ -13,6 +13,8 @@ import NewNoteCard from '../components/NewNoteCard';
 import AICanvas from '../components/AICanvas';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ProfileMenu from '../components/ProfileMenu';
+import { getNotifications, deleteNotification, clearAllNotifications } from '../api/notifications';
+import NotificationPanel from '../components/NotificationPanel';
 
 const RECENT_KEY = 'recentNotes';
 const loadRecent = () => {
@@ -36,6 +38,9 @@ const Dashboard = () => {
   const [noteToDelete, setNoteToDelete] = useState(null);
   const [emptyTrashOpen, setEmptyTrashOpen] = useState(false);
   const [recentNotes, setRecentNotes] = useState(loadRecent);
+  const [collapsed, setCollapsed] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchNotes = async (view) => {
@@ -59,14 +64,25 @@ const Dashboard = () => {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const res = await getNotifications();
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('Failed to fetch notifications', err);
+    }
+  };
+
   const refresh = () => {
     fetchNotes(activeView);
     fetchCounts();
+    fetchNotifications();
   };
 
   useEffect(() => {
     fetchNotes(activeView);
     fetchCounts();
+    fetchNotifications();
   }, [activeView]);
 
   const addToRecent = (note) => {
@@ -139,6 +155,24 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteNotification = async (id) => {
+    try {
+      await deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+    } catch (err) {
+      console.error('Failed to delete notification', err);
+    }
+  };
+
+  const handleClearAllNotifications = async () => {
+    try {
+      await clearAllNotifications();
+      setNotifications([]);
+    } catch (err) {
+      console.error('Failed to clear notifications', err);
+    }
+  };
+
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -153,6 +187,19 @@ const Dashboard = () => {
         counts={counts}
         recentNotes={recentNotes}
         onOpenRecent={handleOpenNote}
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed((prev) => !prev)}
+        notificationCount={notifications.length}
+        onNotificationsClick={() => setNotificationsOpen((prev) => !prev)}
+      />
+
+      <NotificationPanel
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        notifications={notifications}
+        onDelete={handleDeleteNotification}
+        onClearAll={handleClearAllNotifications}
+        positionClass={collapsed ? 'left-[80px]' : 'left-[272px]'}
       />
 
       <main className="flex-1 overflow-y-auto">

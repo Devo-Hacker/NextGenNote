@@ -1,8 +1,11 @@
 const Note = require('../models/Note');
+const notify = require('../utils/notify');
 
 exports.createNote = async (req, res) => {
   try {
     const { title, content, isAIGenerated, mood, isArchived } = req.body;
+    const existingCount = await Note.countDocuments({ userId: req.userId });
+
     const note = await Note.create({
       userId: req.userId,
       title,
@@ -11,6 +14,13 @@ exports.createNote = async (req, res) => {
       mood: mood || null,
       isArchived: isArchived || false,
     });
+
+    if (existingCount === 0) {
+      await notify(req.userId, 'First note created! 🎉');
+    } else {
+      await notify(req.userId, 'New note created!');
+    }
+
     res.status(201).json(note);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -88,6 +98,11 @@ exports.togglePin = async (req, res) => {
     if (!note) return res.status(404).json({ message: 'Note not found' });
     note.isPinned = !note.isPinned;
     await note.save();
+
+    if (note.isPinned) {
+      await notify(req.userId, 'You pinned a note!');
+    }
+
     res.status(200).json(note);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -102,6 +117,9 @@ exports.archiveNote = async (req, res) => {
       { new: true }
     );
     if (!note) return res.status(404).json({ message: 'Note not found' });
+
+    await notify(req.userId, 'You archived a note!');
+
     res.status(200).json(note);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -130,6 +148,9 @@ exports.deleteNote = async (req, res) => {
       { new: true }
     );
     if (!note) return res.status(404).json({ message: 'Note not found' });
+
+    await notify(req.userId, 'You deleted a note!');
+
     res.status(200).json({ message: 'Note moved to trash' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -149,6 +170,7 @@ exports.hardDeleteNote = async (req, res) => {
 exports.emptyTrash = async (req, res) => {
   try {
     await Note.deleteMany({ userId: req.userId, isDeleted: true });
+    await notify(req.userId, 'You deleted all notes!');
     res.status(200).json({ message: 'Trash emptied' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

@@ -1,13 +1,15 @@
-import { useState } from 'react';
 import {
   Star, Archive, Trash2, Bell, Settings, Plus,
   ChevronDown, ChevronRight, Hash, FileText,
   PanelLeft, PanelLeftClose,
 } from 'lucide-react';
+import { useState } from 'react';
 
-const Sidebar = ({ activeView, onViewChange, counts, recentNotes, onOpenRecent }) => {
+const Sidebar = ({
+  activeView, onViewChange, counts, recentNotes, onOpenRecent,
+  collapsed, onToggleCollapse, notificationCount, onNotificationsClick,
+}) => {
   const [workspaceOpen, setWorkspaceOpen] = useState(true);
-  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <aside
@@ -24,7 +26,7 @@ const Sidebar = ({ activeView, onViewChange, counts, recentNotes, onOpenRecent }
           </div>
         )}
         <button
-          onClick={() => setCollapsed((prev) => !prev)}
+          onClick={onToggleCollapse}
           className="text-gray-400 hover:text-gray-600 transition-colors"
         >
           {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={16} />}
@@ -41,7 +43,14 @@ const Sidebar = ({ activeView, onViewChange, counts, recentNotes, onOpenRecent }
       </nav>
 
       <div className={`mt-4 space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
-        <SidebarLink icon={<Bell size={16} />} label="Notifications" count={6} badge collapsed={collapsed} />
+        <SidebarLink
+          icon={<Bell size={16} />}
+          label="Notifications"
+          count={notificationCount}
+          badge={notificationCount > 0}
+          collapsed={collapsed}
+          onClick={onNotificationsClick}
+        />
         <SidebarLink icon={<Settings size={16} />} label="Settings" collapsed={collapsed} />
       </div>
 
@@ -113,7 +122,7 @@ const SidebarLink = ({ icon, label, count, badge, collapsed, active, onClick }) 
       {icon}
       {!collapsed && label}
     </span>
-    {!collapsed && count !== undefined && (
+    {!collapsed && count !== undefined && count > 0 && (
       <span className={`text-xs px-1.5 py-0.5 rounded-full ${badge ? 'bg-red-500 text-white' : 'text-gray-400'}`}>
         {count}
       </span>
