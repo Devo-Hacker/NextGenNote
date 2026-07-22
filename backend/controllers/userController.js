@@ -12,8 +12,9 @@ exports.getMe = async (req, res) => {
 
 exports.updateSettings = async (req, res) => {
   try {
-    const { avatar, darkMode, notificationsEnabled, dashboardGreeting } = req.body;
+    const { name, avatar, darkMode, notificationsEnabled, dashboardGreeting } = req.body;
     const updateFields = {};
+    if (name !== undefined) updateFields.name = name;
     if (avatar !== undefined) updateFields.avatar = avatar;
     if (darkMode !== undefined) updateFields.darkMode = darkMode;
     if (notificationsEnabled !== undefined) updateFields.notificationsEnabled = notificationsEnabled;

@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import NoteEditor from "./pages/NoteEditor";
 import { ThemeProvider } from "./context/ThemeContext";
 import Settings from "./pages/Settings";
+import ProfileSettings from "./pages/ProfileSettings";
 
 function App() {
   return (
@@ -38,6 +39,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile-settings"
+              element={
+                <ProtectedRoute>
+                  <ProfileSettings />
                 </ProtectedRoute>
               }
             />
