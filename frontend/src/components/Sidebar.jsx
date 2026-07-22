@@ -1,7 +1,7 @@
 import {
   Star, Archive, Trash2, Bell, Settings, Plus,
   ChevronDown, ChevronRight, Hash, FileText,
-  PanelLeft, PanelLeftClose, X,
+  PanelLeft, PanelLeftClose, X, Network,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -116,6 +116,16 @@ const Sidebar = ({
             >
               <Plus size={14} />
               <span>New workspace</span>
+            </button>
+          </div>
+
+          <div className="px-3 mt-4">
+            <button
+              onClick={() => navigate('/connections')}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 text-gray-700 dark:text-gray-300"
+            >
+              <Network size={16} />
+              <span>Connecting Thoughts</span>
             </button>
           </div>
 

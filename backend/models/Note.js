@@ -10,6 +10,7 @@ const noteSchema = new mongoose.Schema({
   isArchived: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false },
   collectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection', default: null },
+  linkedNotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Note', noteSchema);

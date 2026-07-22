@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Clock, Sparkles, Trash2 } from "lucide-react";
+import { Search, Sparkles, Trash2, FolderPlus, Pin, Plus, Calendar, Grid3x3 } from "lucide-react";
 import { AuthContext } from "../context/AuthContextStore";
 import {
   getNotes,
@@ -22,7 +22,6 @@ import {
 } from "../api/collections";
 import Sidebar from "../components/Sidebar";
 import NoteCard from "../components/NoteCard";
-import NewNoteCard from "../components/NewNoteCard";
 import AICanvas from "../components/AICanvas";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ProfileMenu from "../components/ProfileMenu";
@@ -33,6 +32,7 @@ import {
 } from "../api/notifications";
 import NotificationPanel from "../components/NotificationPanel";
 import CollectionModal from "../components/CollectionModal";
+import AddNotesToCollectionModal from "../components/AddNotesToCollectionModal";
 
 const RECENT_KEY = "recentNotes";
 const loadRecent = () => {
@@ -68,6 +68,8 @@ const Dashboard = () => {
   const [collections, setCollections] = useState([]);
   const [collectionModalOpen, setCollectionModalOpen] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState(null);
+  const [addNotesModalOpen, setAddNotesModalOpen] = useState(false);
+  const [allNotesForPicker, setAllNotesForPicker] = useState([]);
   const navigate = useNavigate();
 
   const fetchNotes = async (view) => {
@@ -121,6 +123,16 @@ const Dashboard = () => {
     }
   };
 
+  const fetchAllNotesForPicker = async () => {
+    try {
+      const res = await getNotes({ filter: "all" });
+      const currentCollId = activeView.replace("collection:", "");
+      setAllNotesForPicker(res.data.filter((n) => n.collectionId !== currentCollId));
+    } catch (err) {
+      console.error("Failed to fetch notes for picker", err);
+    }
+  };
+
   const confirmDeleteCollection = async () => {
     if (!collectionToDelete) return;
     try {
@@ -157,21 +169,27 @@ const Dashboard = () => {
   const addToRecent = (note) => {
     setRecentNotes((prev) => {
       const filtered = prev.filter((n) => n._id !== note._id);
-      const updated = [{ _id: note._id, title: note.title }, ...filtered].slice(
-        0,
-        5,
-      );
+      const updated = [{ _id: note._id, title: note.title }, ...filtered].slice(0, 5);
       localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
       return updated;
     });
   };
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
+    const query = activeView.startsWith("collection:")
+      ? `?collectionId=${activeView.replace("collection:", "")}`
+      : "";
+    navigate(`/notes/new${query}`);
+  };
+
+  const handleAddNotesToCollection = async (noteIds) => {
+    const collId = activeView.replace("collection:", "");
     try {
-      const res = await createNote({ title: "Untitled", content: "" });
-      navigate(`/notes/${res.data._id}`);
+      await Promise.all(noteIds.map((nid) => setNoteCollection(nid, collId)));
+      setAddNotesModalOpen(false);
+      refresh();
     } catch (err) {
-      console.error("Failed to create note", err);
+      console.error("Failed to add notes to collection", err);
     }
   };
 
@@ -256,27 +274,36 @@ const Dashboard = () => {
     }
   };
 
-  const handleMoveToCollection = async (note, collectionId) => {
-    try {
-      await setNoteCollection(note._id, collectionId);
-      refresh();
-    } catch (err) {
-      console.error("Failed to move note to collection", err);
-    }
-  };
-
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase()),
+      note.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const pinnedNotes = filteredNotes.filter((n) => n.isPinned);
+  const otherNotes = filteredNotes.filter((n) => !n.isPinned);
 
   const activeCollection = activeView.startsWith("collection:")
     ? collections.find((c) => c._id === activeView.replace("collection:", ""))
     : null;
 
+  const renderCard = (note) => (
+    <NoteCard
+      key={note._id}
+      note={note}
+      view={activeView}
+      accentColor={activeCollection?.color}
+      onClick={handleOpenNote}
+      onEdit={handleOpenNote}
+      onPin={handlePin}
+      onArchive={handleArchive}
+      onRestore={handleRestore}
+      onDeleteRequest={setNoteToDelete}
+    />
+  );
+
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="flex h-screen bg-gray-50 dark:bg-[#0a0a10] transition-colors">
       <Sidebar
         activeView={activeView}
         onViewChange={setActiveView}
@@ -301,105 +328,124 @@ const Dashboard = () => {
         positionClass={collapsed ? "left-[80px]" : "left-[272px]"}
       />
 
-      <main className="flex-1 overflow-y-auto relative bg-[#0a0a10]">
-        <style>{`
-          .neon-glass-grid {
-            background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
-            background-size: 18px 18px;
-          }
-          .neon-glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-          }
-          .neon-glass-search {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-          }
-          .neon-ai-btn {
-            background: linear-gradient(135deg, #a855f7 0%, #6d28d9 100%);
-            box-shadow: 0 4px 14px rgba(147, 51, 234, 0.35);
-          }
-        `}</style>
+      <main className="flex-1 overflow-y-auto">
+        {/* Topbar */}
+        <div className="flex items-center justify-between px-8 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-transparent">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-fuchsia-500 flex items-center justify-center text-lg">
+              📝
+            </div>
+            <span className="font-semibold text-gray-900 dark:text-white">NextGenNotes</span>
+          </div>
 
-        <div className="absolute inset-0 neon-glass-grid pointer-events-none" />
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5">
+              <Search size={14} className="text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search notes..."
+                className="text-sm bg-transparent outline-none text-gray-700 dark:text-white placeholder-gray-400 w-40"
+              />
+            </div>
+            <button
+              onClick={() => setAiCanvasOpen((prev) => !prev)}
+              className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5"
+            >
+              <Sparkles size={14} />
+              AI as Partner
+            </button>
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-1.5 text-sm font-medium text-white bg-purple-600 rounded-lg px-3 py-1.5 hover:bg-purple-700"
+            >
+              <Plus size={14} />
+              New Note
+            </button>
+            <ProfileMenu />
+          </div>
+        </div>
 
-        <div className="relative max-w-5xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-white">
-              {activeCollection
-                ? activeCollection.name
-                : VIEW_LABELS[activeView]}
+        <div className="max-w-6xl mx-auto px-8 py-6">
+          {/* Heading row */}
+          <div className="flex items-center justify-between mb-1">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {activeCollection ? activeCollection.name : VIEW_LABELS[activeView]}
+              <span className="ml-2 text-base font-normal text-gray-400 dark:text-gray-500">
+                — {greeting}, {user?.name}
+              </span>
             </h1>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setAiCanvasOpen((prev) => !prev)}
-                className="neon-ai-btn flex items-center gap-1.5 text-sm text-white rounded-lg px-3 py-1.5 transition-transform active:scale-95"
-              >
-                <Sparkles size={14} />
-                AI Canvas
+            <div className="flex items-center gap-2">
+              {/* <button className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5">
+                <Calendar size={13} />
+                Date
               </button>
-              <ProfileMenu />
+              <button className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5">
+                <Grid3x3 size={13} />
+                Grid
+              </button> */}
             </div>
           </div>
-
-          <p className="text-gray-400 mb-4">
-            {greeting} {user?.name} 👋
+          <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
+            {filteredNotes.length} note{filteredNotes.length !== 1 ? 's' : ''} · {pinnedNotes.length} pinned
           </p>
-
-          <div className="neon-glass-search flex items-center gap-2 rounded-xl px-4 py-3 mb-6">
-            <Search size={16} className="text-purple-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search something or use AI"
-              className="flex-1 outline-none text-sm text-white bg-transparent placeholder-gray-500"
-            />
-            <Clock size={16} className="text-gray-500" />
-          </div>
 
           {activeView === "trash" && counts.trash > 0 && (
             <button
               onClick={() => setEmptyTrashOpen(true)}
-              className="flex items-center gap-1.5 text-sm text-red-400 border border-red-900/50 rounded-lg px-3 py-1.5 hover:bg-red-950/40 mb-6"
+              className="flex items-center gap-1.5 text-sm text-red-500 dark:text-red-400 border border-red-200 dark:border-red-900/50 rounded-lg px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 mb-6"
             >
               <Trash2 size={14} />
               Permanently delete all
             </button>
           )}
 
+          {activeCollection && (
+            <button
+              onClick={() => { fetchAllNotesForPicker(); setAddNotesModalOpen(true); }}
+              className="flex items-center gap-1.5 text-sm text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50 rounded-lg px-3 py-1.5 hover:bg-purple-50 dark:hover:bg-purple-950/30 mb-6"
+            >
+              <FolderPlus size={14} />
+              Add existing note
+            </button>
+          )}
+
           {loading ? (
-            <p className="text-gray-500">Loading notes...</p>
+            <p className="text-gray-400 dark:text-gray-500">Loading notes...</p>
+          ) : filteredNotes.length === 0 ? (
+            <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-8">
+              {searchQuery
+                ? `No notes match "${searchQuery}"`
+                : `Nothing in ${activeCollection ? activeCollection.name : VIEW_LABELS[activeView]} yet`}
+            </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeView === "all" && !searchQuery && (
-                <NewNoteCard onClick={handleCreate} />
+            <>
+              {pinnedNotes.length > 0 && (
+                <div className="mb-8">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-purple-500 dark:text-purple-400 uppercase mb-3">
+                    <Pin size={12} />
+                    Pinned
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {pinnedNotes.map(renderCard)}
+                  </div>
+                </div>
               )}
-              {filteredNotes.map((note) => (
-                <NoteCard
-                  key={note._id}
-                  note={note}
-                  view={activeView}
-                  accentColor={activeCollection?.color}
-                  collections={collections}
-                  onClick={handleOpenNote}
-                  onEdit={handleOpenNote}
-                  onPin={handlePin}
-                  onArchive={handleArchive}
-                  onRestore={handleRestore}
-                  onDeleteRequest={setNoteToDelete}
-                  onMoveToCollection={handleMoveToCollection}
-                />
-              ))}
-              {filteredNotes.length === 0 && (
-                <p className="text-gray-500 text-sm col-span-full text-center py-8">
-                  {searchQuery
-                    ? `No notes match "${searchQuery}"`
-                    : `Nothing in ${activeCollection ? activeCollection.name : VIEW_LABELS[activeView]} yet`}
-                </p>
+
+              {otherNotes.length > 0 && (
+                <div>
+                  {pinnedNotes.length > 0 && (
+                    <p className="text-xs font-semibold tracking-wide text-gray-400 dark:text-gray-500 uppercase mb-3">
+                      Other Notes
+                    </p>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {otherNotes.map(renderCard)}
+                  </div>
+                </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </main>
@@ -442,6 +488,14 @@ const Dashboard = () => {
         message={`"${collectionToDelete?.name}" will be deleted. Notes inside it won't be deleted, just unassigned.`}
         onConfirm={confirmDeleteCollection}
         onCancel={() => setCollectionToDelete(null)}
+      />
+
+      <AddNotesToCollectionModal
+        isOpen={addNotesModalOpen}
+        onClose={() => setAddNotesModalOpen(false)}
+        availableNotes={allNotesForPicker}
+        onConfirm={handleAddNotesToCollection}
+        collectionName={activeCollection?.name}
       />
     </div>
   );

@@ -193,3 +193,61 @@ exports.emptyTrash = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.getGraphData = async (req, res) => {
+  try {
+    const notes = await Note.find({ userId: req.userId, isDeleted: false })
+      .select('title collectionId linkedNotes isAIGenerated mood');
+
+    const nodes = notes.map((n) => ({
+      id: n._id,
+      title: n.title || 'Untitled',
+      collectionId: n.collectionId,
+      isAIGenerated: n.isAIGenerated,
+    }));
+
+    const edgeSet = new Set();
+    const edges = [];
+    notes.forEach((n) => {
+      n.linkedNotes.forEach((targetId) => {
+        const key = [n._id.toString(), targetId.toString()].sort().join('-');
+        if (!edgeSet.has(key)) {
+          edgeSet.add(key);
+          edges.push({ source: n._id, target: targetId });
+        }
+      });
+    });
+
+    res.status(200).json({ nodes, edges });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.toggleLink = async (req, res) => {
+  try {
+    const { targetId } = req.body;
+    if (!targetId) return res.status(400).json({ message: 'targetId is required' });
+
+    const note = await Note.findOne({ _id: req.params.id, userId: req.userId });
+    const target = await Note.findOne({ _id: targetId, userId: req.userId });
+    if (!note || !target) return res.status(404).json({ message: 'Note not found' });
+
+    const alreadyLinked = note.linkedNotes.some((id) => id.toString() === targetId);
+
+    if (alreadyLinked) {
+      note.linkedNotes = note.linkedNotes.filter((id) => id.toString() !== targetId);
+      target.linkedNotes = target.linkedNotes.filter((id) => id.toString() !== req.params.id);
+    } else {
+      note.linkedNotes.push(targetId);
+      target.linkedNotes.push(req.params.id);
+    }
+
+    await note.save();
+    await target.save();
+
+    res.status(200).json({ linked: !alreadyLinked, note });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};

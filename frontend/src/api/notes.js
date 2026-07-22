@@ -14,3 +14,5 @@ export const restoreNote = (id) => api.patch(`/notes/${id}/restore`);
 export const deleteNote = (id) => api.delete(`/notes/${id}`);
 export const hardDeleteNote = (id) => api.delete(`/notes/${id}/permanent`);
 export const emptyTrash = () => api.delete('/notes/trash/empty');
+export const getGraphData = () => api.get('/notes/graph/data');
+export const toggleNoteLink = (noteId, targetId) => api.patch(`/notes/${noteId}/link`, { targetId });

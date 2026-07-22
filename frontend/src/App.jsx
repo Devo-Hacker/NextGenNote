@@ -8,6 +8,7 @@ import NoteEditor from "./pages/NoteEditor";
 import { ThemeProvider } from "./context/ThemeContext";
 import Settings from "./pages/Settings";
 import ProfileSettings from "./pages/ProfileSettings";
+import ConnectingThoughts from "./pages/ConnectingThoughts";
 
 function App() {
   return (
@@ -47,6 +48,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfileSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/connections"
+              element={
+                <ProtectedRoute>
+                  <ConnectingThoughts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notes/new"
+              element={
+                <ProtectedRoute>
+                  <NoteEditor />
                 </ProtectedRoute>
               }
             />
