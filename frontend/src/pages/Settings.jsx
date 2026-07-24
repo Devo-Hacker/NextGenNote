@@ -82,11 +82,11 @@ const Settings = () => {
         }
       `}</style>
 
-      <div className="settings-glow w-[420px] h-[420px] bg-purple-700/25 -top-24 -left-24" />
-      <div className="settings-glow w-[360px] h-[360px] bg-fuchsia-700/15 bottom-0 right-0" />
+      <div className="settings-glow w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] bg-purple-700/25 -top-24 -left-24" />
+      <div className="settings-glow w-[200px] h-[200px] sm:w-[360px] sm:h-[360px] bg-fuchsia-700/15 bottom-0 right-0" />
 
-      <div className="relative max-w-2xl mx-auto px-8 py-6">
-        <div className="flex items-center justify-between mb-8">
+      <div className="relative max-w-2xl mx-auto px-4 sm:px-8 py-5 sm:py-6">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
           <button
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
@@ -102,13 +102,13 @@ const Settings = () => {
           )}
         </div>
 
-        <h1 className="text-2xl font-semibold text-white mb-8">
+        <h1 className="text-xl sm:text-2xl font-semibold text-white mb-6 sm:mb-8">
           Settings
         </h1>
 
         <div className="space-y-4">
           {/* Dashboard greeting */}
-          <section className="settings-panel rounded-xl p-5">
+          <section className="settings-panel rounded-xl p-4 sm:p-5">
             <h2 className="font-semibold text-white mb-1">
               Dashboard greeting
             </h2>
@@ -126,19 +126,19 @@ const Settings = () => {
           </section>
 
           {/* Avatar */}
-          <section className="settings-panel rounded-xl p-5">
+          <section className="settings-panel rounded-xl p-4 sm:p-5">
             <h2 className="font-semibold text-white mb-1">
               Profile picture
             </h2>
             <p className="text-xs text-purple-200/50 mb-4">
               Pick an avatar for your profile
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3">
               {Object.entries(AVATARS).map(([key, emoji]) => (
                 <button
                   key={key}
                   onClick={() => handleSelectAvatar(key)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 transition-colors ${
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl border-2 transition-colors ${
                     avatar === key
                       ? "border-purple-400 bg-purple-500/20 shadow-[0_0_12px_rgba(168,85,247,0.5)]"
                       : "border-transparent bg-white/5 hover:border-purple-500/40"
@@ -151,7 +151,7 @@ const Settings = () => {
           </section>
 
           {/* Appearance */}
-          <section className="settings-panel rounded-xl p-5">
+          <section className="settings-panel rounded-xl p-4 sm:p-5">
             <h2 className="font-semibold text-white mb-4">
               Appearance
             </h2>
@@ -176,7 +176,7 @@ const Settings = () => {
           </section>
 
           {/* Notifications */}
-          <section className="settings-panel rounded-xl p-5">
+          <section className="settings-panel rounded-xl p-4 sm:p-5">
             <h2 className="font-semibold text-white mb-4">
               Notifications
             </h2>

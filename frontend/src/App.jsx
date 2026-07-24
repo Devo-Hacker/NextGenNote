@@ -9,6 +9,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import Settings from "./pages/Settings";
 import ProfileSettings from "./pages/ProfileSettings";
 import ConnectingThoughts from "./pages/ConnectingThoughts";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
@@ -16,8 +17,10 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            
             <Route
               path="/dashboard"
               element={
@@ -67,6 +70,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>

@@ -1,11 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles, Trash2, FolderPlus, Pin, Plus, Calendar, Grid3x3 } from "lucide-react";
+import { Search, Sparkles, Trash2, FolderPlus, Pin, Plus, Grid2x2, Grid3x3, LayoutGrid, Table } from "lucide-react";
 import { AuthContext } from "../context/AuthContextStore";
 import {
   getNotes,
   getNoteCounts,
-  createNote,
   togglePinNote,
   archiveNote,
   restoreNote,
@@ -33,6 +32,7 @@ import {
 import NotificationPanel from "../components/NotificationPanel";
 import CollectionModal from "../components/CollectionModal";
 import AddNotesToCollectionModal from "../components/AddNotesToCollectionModal";
+import MobileTabBar from "../components/MobileTabBar";
 
 const RECENT_KEY = "recentNotes";
 const loadRecent = () => {
@@ -48,6 +48,13 @@ const VIEW_LABELS = {
   starred: "Starred",
   archive: "Archive",
   trash: "Trash",
+};
+
+const GRID_CLASSES = {
+  2: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+  5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
 };
 
 const Dashboard = () => {
@@ -70,6 +77,10 @@ const Dashboard = () => {
   const [collectionToDelete, setCollectionToDelete] = useState(null);
   const [addNotesModalOpen, setAddNotesModalOpen] = useState(false);
   const [allNotesForPicker, setAllNotesForPicker] = useState([]);
+  const [gridCols, setGridCols] = useState(() => {
+  const saved = localStorage.getItem('gridCols');
+  return saved ? Number(saved) : 3;
+});
   const navigate = useNavigate();
 
   const fetchNotes = async (view) => {
@@ -325,12 +336,12 @@ const Dashboard = () => {
         notifications={notifications}
         onDelete={handleDeleteNotification}
         onClearAll={handleClearAllNotifications}
-        positionClass={collapsed ? "left-[80px]" : "left-[272px]"}
+        positionClass={collapsed ? "left-2 sm:left-[80px]" : "left-2 sm:left-[272px]"}
       />
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pb-20 sm:pb-0">
         {/* Topbar */}
-        <div className="flex items-center justify-between px-8 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-transparent">
+        <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-transparent">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-fuchsia-500 flex items-center justify-center text-lg">
               📝
@@ -351,7 +362,7 @@ const Dashboard = () => {
             </div>
             <button
               onClick={() => setAiCanvasOpen((prev) => !prev)}
-              className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5"
+              className="hidden md:flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5"
             >
               <Sparkles size={14} />
               AI as Partner
@@ -361,30 +372,26 @@ const Dashboard = () => {
               className="flex items-center gap-1.5 text-sm font-medium text-white bg-purple-600 rounded-lg px-3 py-1.5 hover:bg-purple-700"
             >
               <Plus size={14} />
-              New Note
+              <span className="hidden sm:inline">New Note</span>
             </button>
             <ProfileMenu />
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-8 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-4 sm:py-6">
           {/* Heading row */}
-          <div className="flex items-center justify-between mb-1">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               {activeCollection ? activeCollection.name : VIEW_LABELS[activeView]}
-              <span className="ml-2 text-base font-normal text-gray-400 dark:text-gray-500">
-                — {greeting}, {user?.name}
+              <span className="block sm:inline sm:ml-2 text-sm sm:text-base font-normal text-gray-400 dark:text-gray-500">
+                {activeCollection ? '' : '— '}{greeting}, {user?.name}
               </span>
             </h1>
-            <div className="flex items-center gap-2">
-              {/* <button className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5">
-                <Calendar size={13} />
-                Date
-              </button>
-              <button className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5">
-                <Grid3x3 size={13} />
-                Grid
-              </button> */}
+            <div className="hidden lg:flex items-center gap-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1">
+              <GridButton active={gridCols === 2} onClick={() => { setGridCols(2); localStorage.setItem('gridCols', '2'); }} icon={<Grid2x2 size={13} />} label="2" />
+              <GridButton active={gridCols === 3} onClick={() => { setGridCols(3); localStorage.setItem('gridCols', '3'); }} icon={<Table size={13} />} label="3" />
+              <GridButton active={gridCols === 4} onClick={() => { setGridCols(4); localStorage.setItem('gridCols', '4'); }} icon={<Grid3x3 size={13} />} label="4" />
+              <GridButton active={gridCols === 5} onClick={() => { setGridCols(5); localStorage.setItem('gridCols', '5'); }} icon={<LayoutGrid size={13} />} label="5" />
             </div>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
@@ -427,7 +434,7 @@ const Dashboard = () => {
                     <Pin size={12} />
                     Pinned
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
                     {pinnedNotes.map(renderCard)}
                   </div>
                 </div>
@@ -440,7 +447,7 @@ const Dashboard = () => {
                       Other Notes
                     </p>
                   )}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
                     {otherNotes.map(renderCard)}
                   </div>
                 </div>
@@ -497,8 +504,36 @@ const Dashboard = () => {
         onConfirm={handleAddNotesToCollection}
         collectionName={activeCollection?.name}
       />
+
+      <MobileTabBar
+        activeView={activeView}
+        onViewChange={setActiveView}
+        counts={counts}
+        notificationCount={notifications.length}
+        onNotificationsClick={() => setNotificationsOpen((prev) => !prev)}
+        onAICanvasClick={() => setAiCanvasOpen((prev) => !prev)}
+        collections={collections}
+        onNewWorkspace={() => setCollectionModalOpen(true)}
+        onSettingsClick={() => navigate('/settings')}
+        onConnectionsClick={() => navigate('/connections')}
+      />
     </div>
   );
 };
+
+const GridButton = ({ active, onClick, icon, label }) => (
+  <button
+    onClick={onClick}
+    title={`${label} per row`}
+    className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md transition-colors ${
+      active
+        ? 'bg-purple-600 text-white'
+        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+    }`}
+  >
+    {icon}
+    {label}
+  </button>
+);
 
 export default Dashboard;

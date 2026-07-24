@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Zap, Circle, Plus, FileText } from 'lucide-react';
+import { ArrowLeft, Share2, Zap, Circle, Plus, FileText, SlidersHorizontal, X } from 'lucide-react';
 import { getGraphData, createNote } from '../api/notes';
 import { getCollections } from '../api/collections';
 
@@ -14,6 +14,7 @@ const ConnectingThoughts = () => {
   const [loading, setLoading] = useState(true);
   const [hoveredNode, setHoveredNode] = useState(null);
   const [view, setView] = useState('all');
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
   const navigate = useNavigate();
   const simRef = useRef(null);
   const draggingRef = useRef(null);
@@ -134,12 +135,24 @@ const ConnectingThoughts = () => {
     return () => cancelAnimationFrame(simRef.current);
   }, [edges, nodes.length]);
 
+  const getPointFromEvent = (e, rect) => {
+    if (e.touches && e.touches[0]) {
+      return {
+        x: ((e.touches[0].clientX - rect.left) / rect.width) * WIDTH,
+        y: ((e.touches[0].clientY - rect.top) / rect.height) * HEIGHT,
+      };
+    }
+    return {
+      x: ((e.clientX - rect.left) / rect.width) * WIDTH,
+      y: ((e.clientY - rect.top) / rect.height) * HEIGHT,
+    };
+  };
+
   const handleMouseDown = (id) => (e) => { e.stopPropagation(); draggingRef.current = id; };
   const handleMouseMove = (e) => {
     if (draggingRef.current === null) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * WIDTH;
-    const y = ((e.clientY - rect.top) / rect.height) * HEIGHT;
+    const { x, y } = getPointFromEvent(e, rect);
     setNodes((prev) => prev.map((n) => (n.id === draggingRef.current ? { ...n, x, y, vx: 0, vy: 0 } : n)));
   };
   const handleMouseUp = () => { draggingRef.current = null; };
@@ -155,6 +168,48 @@ const ConnectingThoughts = () => {
 
   const recentNodes = nodes.slice(-4).reverse();
 
+  const PanelContent = () => (
+    <>
+      <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">View</p>
+      <div className="space-y-1 mb-6">
+        <ViewButton active={view === 'all'} onClick={() => setView('all')} icon={<Share2 size={13} />} label="All Connections" />
+        <ViewButton active={view === 'strong'} onClick={() => setView('strong')} icon={<Zap size={13} />} label="Strong Links" />
+        <ViewButton active={view === 'orphan'} onClick={() => setView('orphan')} icon={<Circle size={13} />} label="Orphan Nodes" />
+      </div>
+
+      <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">Legend</p>
+      <div className="space-y-2 mb-6 text-xs text-gray-400">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 glow-node-hub" />
+          Hub node
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-purple-400 glow-node" />
+          Active note
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-gray-500" />
+          Linked note
+        </div>
+      </div>
+
+      <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">Recent</p>
+      <div className="space-y-1">
+        {recentNodes.length === 0 && <p className="text-xs text-gray-600">No notes yet</p>}
+        {recentNodes.map((n) => (
+          <button
+            key={n.id}
+            onClick={() => { setMobilePanelOpen(false); navigate(`/notes/${n.id}`, { state: { from: 'connections' } }); }}
+            className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded-md hover:bg-white/5 text-xs text-gray-300 truncate"
+          >
+            <FileText size={12} className="text-gray-500 shrink-0" />
+            <span className="truncate">{n.title}</span>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white">
       <style>{`
@@ -163,8 +218,8 @@ const ConnectingThoughts = () => {
       `}</style>
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
@@ -172,70 +227,71 @@ const ConnectingThoughts = () => {
             <ArrowLeft size={16} />
             Back
           </button>
-          <div className="flex items-center gap-2 text-white font-semibold">
+          <div className="flex items-center gap-2 text-white font-semibold text-sm sm:text-base">
             <Share2 size={16} className="text-purple-400" />
-            Connecting Thoughts
+            <span className="hidden xs:inline">Connecting Thoughts</span>
+            <span className="xs:hidden">Connections</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <StatPill icon={<FileText size={13} />} value={nodes.length} label="Total Notes" />
-          <StatPill icon={<Zap size={13} />} value={edges.length} label="Connections" />
-          <StatPill icon={<Circle size={13} />} value={clusterCount} label="Clusters" />
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="hidden sm:flex items-center gap-2">
+            <StatPill icon={<FileText size={13} />} value={nodes.length} label="Total Notes" />
+            <StatPill icon={<Zap size={13} />} value={edges.length} label="Connections" />
+            <StatPill icon={<Circle size={13} />} value={clusterCount} label="Clusters" />
+          </div>
+
+          <button
+            onClick={() => setMobilePanelOpen(true)}
+            className="lg:hidden flex items-center gap-1.5 text-xs text-gray-300 bg-white/5 border border-white/10 rounded-lg px-3 py-2"
+          >
+            <SlidersHorizontal size={14} />
+          </button>
+
           <button
             onClick={handleNewNote}
-            className="flex items-center gap-1.5 text-sm font-medium text-white bg-purple-600 rounded-lg px-4 py-2 hover:bg-purple-700 transition-colors ml-2"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white bg-purple-600 rounded-lg px-3 sm:px-4 py-2 hover:bg-purple-700 transition-colors"
           >
             <Plus size={14} />
-            New Note
+            <span className="hidden sm:inline">New Note</span>
           </button>
         </div>
       </div>
 
+      {/* Mobile stat pills row */}
+      <div className="flex sm:hidden items-center gap-2 px-4 py-2 overflow-x-auto border-b border-white/10">
+        <StatPill icon={<FileText size={13} />} value={nodes.length} label="Notes" />
+        <StatPill icon={<Zap size={13} />} value={edges.length} label="Links" />
+        <StatPill icon={<Circle size={13} />} value={clusterCount} label="Clusters" />
+      </div>
+
       <div className="flex">
-        {/* Left panel */}
-        <div className="w-56 shrink-0 border-r border-white/10 px-4 py-5">
-          <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">View</p>
-          <div className="space-y-1 mb-6">
-            <ViewButton active={view === 'all'} onClick={() => setView('all')} icon={<Share2 size={13} />} label="All Connections" />
-            <ViewButton active={view === 'strong'} onClick={() => setView('strong')} icon={<Zap size={13} />} label="Strong Links" />
-            <ViewButton active={view === 'orphan'} onClick={() => setView('orphan')} icon={<Circle size={13} />} label="Orphan Nodes" />
-          </div>
-
-          <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">Legend</p>
-          <div className="space-y-2 mb-6 text-xs text-gray-400">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 glow-node-hub" />
-              Hub node
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-400 glow-node" />
-              Active note
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-gray-500" />
-              Linked note
-            </div>
-          </div>
-
-          <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">Recent</p>
-          <div className="space-y-1">
-            {recentNodes.length === 0 && <p className="text-xs text-gray-600">No notes yet</p>}
-            {recentNodes.map((n) => (
-              <button
-                key={n.id}
-                onClick={() => navigate(`/notes/${n.id}`)}
-                className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded-md hover:bg-white/5 text-xs text-gray-300 truncate"
-              >
-                <FileText size={12} className="text-gray-500 shrink-0" />
-                <span className="truncate">{n.title}</span>
-              </button>
-            ))}
-          </div>
+        {/* Left panel — desktop only */}
+        <div className="hidden lg:block w-56 shrink-0 border-r border-white/10 px-4 py-5">
+          <PanelContent />
         </div>
 
+        {/* Mobile bottom sheet */}
+        {mobilePanelOpen && (
+          <div className="lg:hidden fixed inset-0 z-40" onClick={() => setMobilePanelOpen(false)}>
+            <div className="absolute inset-0 bg-black/50" />
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-0 left-0 right-0 bg-[#0d0d14] border-t border-white/10 rounded-t-2xl p-4 max-h-[70vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto" />
+                <button onClick={() => setMobilePanelOpen(false)} className="absolute right-4 text-gray-400 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              <PanelContent />
+            </div>
+          </div>
+        )}
+
         {/* Graph */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-3 sm:p-6">
           {loading ? (
             <p className="text-gray-500 text-sm">Loading your thought graph...</p>
           ) : nodes.length === 0 ? (
@@ -246,10 +302,12 @@ const ConnectingThoughts = () => {
             <div className="bg-[#0d0d14] border border-white/10 rounded-2xl overflow-hidden">
               <svg
                 viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-                className="w-full h-[560px] cursor-grab"
+                className="w-full h-[360px] sm:h-[480px] lg:h-[560px] cursor-grab touch-none"
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
+                onTouchMove={handleMouseMove}
+                onTouchEnd={handleMouseUp}
               >
                 {visibleEdges.map((e, i) => {
                   const a = nodes.find((n) => n.id === e.source);
@@ -282,6 +340,7 @@ const ConnectingThoughts = () => {
                       key={n.id}
                       transform={`translate(${n.x}, ${n.y})`}
                       onMouseDown={handleMouseDown(n.id)}
+                      onTouchStart={handleMouseDown(n.id)}
                       onMouseEnter={() => setHoveredNode(n.id)}
                       onMouseLeave={() => setHoveredNode(null)}
                       onClick={(e) => { e.stopPropagation(); navigate(`/notes/${n.id}`, { state: { from: 'connections' } }); }}
@@ -308,9 +367,9 @@ const ConnectingThoughts = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-            <span>Drag nodes to rearrange. Hover to see the title. Click a node to open that note.</span>
-            <span>Scroll to zoom · Drag to pan</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-1 text-xs text-gray-500">
+            <span>Drag nodes to rearrange. Tap a node to open that note.</span>
+            <span className="hidden sm:inline">Scroll to zoom · Drag to pan</span>
           </div>
         </div>
       </div>
@@ -319,7 +378,7 @@ const ConnectingThoughts = () => {
 };
 
 const StatPill = ({ icon, value, label }) => (
-  <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs">
+  <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs shrink-0">
     <span className="text-purple-400">{icon}</span>
     <span className="font-semibold text-white">{value}</span>
     <span className="text-gray-400">{label}</span>

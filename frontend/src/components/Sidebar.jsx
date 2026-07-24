@@ -16,7 +16,7 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`h-screen bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col text-sm transition-all duration-300 ease-in-out overflow-hidden ${
+      className={`hidden sm:flex h-screen bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex-col text-sm transition-all duration-300 ease-in-out overflow-hidden ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >

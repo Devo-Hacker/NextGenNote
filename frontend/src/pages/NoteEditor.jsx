@@ -176,15 +176,15 @@ const NoteEditor = () => {
         .neon-save-btn { background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); box-shadow: 0 4px 14px rgba(216, 70, 200, 0.35); }
       `}</style>
 
-      <div className="neon-glow-bg w-[420px] h-[420px] bg-purple-500/20 -top-20 -left-20" />
-      <div className="neon-glow-bg w-[380px] h-[380px] bg-fuchsia-500/15 bottom-0 right-0" />
-      <div className="neon-glow-bg w-[300px] h-[300px] bg-indigo-500/10 top-1/3 left-1/2" />
+      <div className="neon-glow-bg w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] bg-purple-500/20 -top-20 -left-20" />
+      <div className="neon-glow-bg w-[200px] h-[200px] sm:w-[380px] sm:h-[380px] bg-fuchsia-500/15 bottom-0 right-0" />
+      <div className="neon-glow-bg w-[160px] h-[160px] sm:w-[300px] sm:h-[300px] bg-indigo-500/10 top-1/3 left-1/2" />
 
       <div className="relative w-full max-w-3xl">
         <div className="neon-panel rounded-2xl overflow-hidden">
-          <div className="max-w-3xl mx-auto px-8 py-6">
+          <div className="max-w-3xl mx-auto px-4 sm:px-8 py-5 sm:py-6">
             {/* Topbar */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
               <button
                 onClick={handleBack}
                 className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
@@ -193,7 +193,7 @@ const NoteEditor = () => {
                 Back
               </button>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 {isAIGenerated && (
                   <span className="flex items-center gap-1 text-xs text-fuchsia-300 bg-fuchsia-500/10 border border-fuchsia-500/20 px-2.5 py-1 rounded-full">
                     <Sparkles size={12} />
@@ -209,7 +209,7 @@ const NoteEditor = () => {
                 {!isEditing && (
                   <button
                     onClick={() => setMode('edit')}
-                    className="flex items-center gap-1.5 text-sm font-medium text-gray-200 border border-white/10 bg-white/5 rounded-lg px-4 py-2 hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-200 border border-white/10 bg-white/5 rounded-lg px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors"
                   >
                     <Pencil size={14} />
                     Edit
@@ -221,14 +221,14 @@ const NoteEditor = () => {
                     <button
                       onClick={handleSaveToArchive}
                       disabled={saving}
-                      className="text-sm font-medium text-gray-300 border border-white/10 bg-white/5 rounded-lg px-4 py-2 hover:bg-white/10 transition-colors disabled:opacity-50"
+                      className="text-xs sm:text-sm font-medium text-gray-300 border border-white/10 bg-white/5 rounded-lg px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors disabled:opacity-50 whitespace-nowrap"
                     >
-                      Save to Archive
+                      <span className="hidden sm:inline">Save to </span>Archive
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="neon-save-btn flex items-center gap-1.5 text-sm font-medium text-white rounded-lg px-4 py-2 transition-opacity disabled:opacity-50"
+                      className="neon-save-btn flex items-center gap-1.5 text-xs sm:text-sm font-medium text-white rounded-lg px-3 sm:px-4 py-2 transition-opacity disabled:opacity-50 whitespace-nowrap"
                     >
                       {saved ? <Check size={14} /> : null}
                       {saving ? 'Saving...' : saved ? 'Saved' : 'Save'}
@@ -246,10 +246,10 @@ const NoteEditor = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Untitled"
                 autoFocus={isNew}
-                className="w-full text-3xl font-semibold text-white/90 outline-none mb-1 bg-transparent placeholder-white/30"
+                className="w-full text-2xl sm:text-3xl font-semibold text-white/90 outline-none mb-1 bg-transparent placeholder-white/30"
               />
             ) : (
-              <h1 className="w-full text-3xl font-semibold text-white/90 mb-1">{title || 'Untitled'}</h1>
+              <h1 className="w-full text-2xl sm:text-3xl font-semibold text-white/90 mb-1">{title || 'Untitled'}</h1>
             )}
             <div className="neon-underline h-0.5 w-12 rounded-full mb-6" />
 

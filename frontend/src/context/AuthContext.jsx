@@ -2,14 +2,18 @@ import { useState } from 'react';
 import api from '../api/axios';
 import { AuthContext } from './AuthContextStore';
 import { saveAccount, updateSavedAccountUser } from '../utils/accounts';
+import { isTokenValid } from '../utils/tokenValid';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
-    if (storedUser && token) {
+    if (storedUser && token && isTokenValid(token)) {
       return JSON.parse(storedUser);
     }
+    // stale/expired session — clean it up so nothing lingers
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return null;
   });
   const [loading] = useState(false);
@@ -31,6 +35,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const switchAccount = (token, switchedUser) => {
+    if (!isTokenValid(token)) return;
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(switchedUser));
     setUser(switchedUser);
