@@ -396,4 +396,4 @@ Planned but not yet built:
 
 ---
 
-*Built as a hands-on learning project covering full-stack architecture, JWT authentication, MongoDB schema design, custom physics-based data visualization, and LLM prompt engineering.*
+*Built as a hands-on learning project covering full-stack architecture, JWT authentication, MongoDB schema design, custom physics-based data visualization, and LLM Integration.*
