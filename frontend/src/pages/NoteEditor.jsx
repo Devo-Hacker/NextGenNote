@@ -4,6 +4,9 @@ import { ArrowLeft, Check, Sparkles, Link2, X, Pencil, FolderInput } from 'lucid
 import { getNoteById, updateNote, createNote, archiveNote, getNotes, toggleNoteLink } from '../api/notes';
 import { setNoteCollection } from '../api/collections';
 import { getCollections } from '../api/collections';
+import { parseContent, serializeContent, blocksToPlainText } from '../utils/noteContent';
+import BlockEditor from '../components/BlockEditor';
+import BlockViewer from '../components/BlockViewer';
 
 const NoteEditor = () => {
   const { id } = useParams();
@@ -14,7 +17,7 @@ const NoteEditor = () => {
   const presetCollectionId = searchParams.get('collectionId') || null;
 
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [blocks, setBlocks] = useState([{ id: crypto.randomUUID(), type: 'text', text: '' }]);
   const [isAIGenerated, setIsAIGenerated] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -27,6 +30,7 @@ const NoteEditor = () => {
   const [collections, setCollections] = useState([]);
   const [collectionId, setCollectionId] = useState(presetCollectionId);
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false);
+  const [rawContent, setRawContent] = useState(''); // last-loaded raw string, for AI-generated notes etc.
 
   const backTarget = location.state?.from === 'connections' ? '/connections' : '/dashboard';
 
@@ -36,7 +40,8 @@ const NoteEditor = () => {
         try {
           const res = await getNoteById(id);
           setTitle(res.data.title);
-          setContent(res.data.content);
+          setRawContent(res.data.content);
+          setBlocks(parseContent(res.data.content));
           setIsAIGenerated(res.data.isAIGenerated);
           setLinkedNotes(res.data.linkedNotes || []);
           setCollectionId(res.data.collectionId || null);
@@ -68,10 +73,12 @@ const NoteEditor = () => {
     fetchCollections();
   }, [id, isNew]);
 
-  const hasContent = title.trim() || content.trim();
+  const plainTextForCheck = blocks.map((b) => b.text).join('').trim();
+  const hasContent = title.trim() || plainTextForCheck;
 
   const handleSave = async () => {
     setSaving(true);
+    const serialized = serializeContent(blocks);
     try {
       if (isNew) {
         if (!hasContent) {
@@ -80,14 +87,14 @@ const NoteEditor = () => {
         }
         const res = await createNote({
           title: title.trim() || 'Untitled',
-          content,
+          content: serialized,
           collectionId: presetCollectionId,
         });
         setSaved(true);
         setMode('view');
         navigate(`/notes/${res.data._id}`, { replace: true, state: location.state });
       } else {
-        await updateNote(id, { title, content });
+        await updateNote(id, { title, content: serialized });
         setSaved(true);
         setMode('view');
         setTimeout(() => setSaved(false), 1500);
@@ -101,16 +108,17 @@ const NoteEditor = () => {
 
   const handleSaveToArchive = async () => {
     setSaving(true);
+    const serialized = serializeContent(blocks);
     try {
       if (isNew) {
         if (!hasContent) {
           navigate(backTarget);
           return;
         }
-        const res = await createNote({ title: title.trim() || 'Untitled', content });
+        const res = await createNote({ title: title.trim() || 'Untitled', content: serialized });
         await archiveNote(res.data._id);
       } else {
-        await updateNote(id, { title, content });
+        await updateNote(id, { title, content: serialized });
         await archiveNote(id);
       }
       navigate(backTarget);
@@ -154,7 +162,7 @@ const NoteEditor = () => {
     }
   };
 
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const wordCount = plainTextForCheck ? plainTextForCheck.split(/\s+/).filter(Boolean).length : 0;
   const activeCollectionName = collections.find((c) => c._id === collectionId)?.name;
 
   if (loading) {
@@ -254,17 +262,18 @@ const NoteEditor = () => {
             <div className="neon-underline h-0.5 w-12 rounded-full mb-6" />
 
             {isEditing ? (
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Start writing..."
-                rows={16}
-                className="w-full text-base text-gray-300 outline-none bg-transparent placeholder-white/30 resize-none leading-relaxed"
+              <BlockEditor
+                blocks={blocks}
+                onChange={setBlocks}
+                textColorClass="text-gray-300"
+                mutedColorClass="text-gray-500"
               />
             ) : (
-              <p className="w-full text-base text-gray-300 leading-relaxed whitespace-pre-line min-h-[200px]">
-                {content || 'This note is empty. Click Edit to start writing.'}
-              </p>
+              <BlockViewer
+                content={rawContent}
+                textColorClass="text-gray-300"
+                mutedColorClass="text-gray-500"
+              />
             )}
 
             {/* Editing-only tools: link + collection */}

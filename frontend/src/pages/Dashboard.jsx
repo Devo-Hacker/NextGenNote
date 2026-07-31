@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles, Trash2, FolderPlus, Pin, Plus, Grid2x2, Grid3x3, LayoutGrid, Table } from "lucide-react";
+import { Search, Sparkles, Trash2, FolderPlus, Pin, Plus, Grid2x2, Grid3x3, LayoutGrid, Table, Rows3 } from "lucide-react";
 import { AuthContext } from "../context/AuthContextStore";
 import {
   getNotes,
@@ -21,6 +21,7 @@ import {
 } from "../api/collections";
 import Sidebar from "../components/Sidebar";
 import NoteCard from "../components/NoteCard";
+import NoteBar from "../components/NoteBar";
 import AICanvas from "../components/AICanvas";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ProfileMenu from "../components/ProfileMenu";
@@ -78,8 +79,11 @@ const Dashboard = () => {
   const [addNotesModalOpen, setAddNotesModalOpen] = useState(false);
   const [allNotesForPicker, setAllNotesForPicker] = useState([]);
   const [gridCols, setGridCols] = useState(() => {
-  const saved = localStorage.getItem('gridCols');
-  return saved ? Number(saved) : 3;
+    const saved = localStorage.getItem('gridCols');
+    return saved ? Number(saved) : 3;
+  });
+  const [layoutMode, setLayoutMode] = useState(() => {
+  return localStorage.getItem('layoutMode') || 'bars';
 });
   const navigate = useNavigate();
 
@@ -285,6 +289,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleSetLayoutMode = (mode) => {
+    setLayoutMode(mode);
+    localStorage.setItem('layoutMode', mode);
+  };
+
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -305,6 +314,20 @@ const Dashboard = () => {
       view={activeView}
       accentColor={activeCollection?.color}
       onClick={handleOpenNote}
+      onEdit={handleOpenNote}
+      onPin={handlePin}
+      onArchive={handleArchive}
+      onRestore={handleRestore}
+      onDeleteRequest={setNoteToDelete}
+    />
+  );
+
+  const renderBar = (note) => (
+    <NoteBar
+      key={note._id}
+      note={note}
+      view={activeView}
+      accentColor={activeCollection?.color}
       onEdit={handleOpenNote}
       onPin={handlePin}
       onArchive={handleArchive}
@@ -387,11 +410,42 @@ const Dashboard = () => {
                 {activeCollection ? '' : '— '}{greeting}, {user?.name}
               </span>
             </h1>
-            <div className="hidden lg:flex items-center gap-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1">
-              <GridButton active={gridCols === 2} onClick={() => { setGridCols(2); localStorage.setItem('gridCols', '2'); }} icon={<Grid2x2 size={13} />} label="2" />
-              <GridButton active={gridCols === 3} onClick={() => { setGridCols(3); localStorage.setItem('gridCols', '3'); }} icon={<Table size={13} />} label="3" />
-              <GridButton active={gridCols === 4} onClick={() => { setGridCols(4); localStorage.setItem('gridCols', '4'); }} icon={<Grid3x3 size={13} />} label="4" />
-              <GridButton active={gridCols === 5} onClick={() => { setGridCols(5); localStorage.setItem('gridCols', '5'); }} icon={<LayoutGrid size={13} />} label="5" />
+            <div className="flex items-center gap-2">
+              {/* Layout mode toggle: grid vs bars */}
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1">
+                <button
+                  onClick={() => handleSetLayoutMode('grid')}
+                  title="Grid view"
+                  className={`flex items-center justify-center p-1.5 rounded-md transition-colors ${
+                    layoutMode === 'grid'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+                  }`}
+                >
+                  <Grid3x3 size={14} />
+                </button>
+                <button
+                  onClick={() => handleSetLayoutMode('bars')}
+                  title="Bar list view"
+                  className={`flex items-center justify-center p-1.5 rounded-md transition-colors ${
+                    layoutMode === 'bars'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+                  }`}
+                >
+                  <Rows3 size={14} />
+                </button>
+              </div>
+
+              {/* Grid density — only relevant in grid mode, desktop only */}
+              {layoutMode === 'grid' && (
+                <div className="hidden lg:flex items-center gap-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1">
+                  <GridButton active={gridCols === 2} onClick={() => { setGridCols(2); localStorage.setItem('gridCols', '2'); }} icon={<Grid2x2 size={13} />} label="2" />
+                  <GridButton active={gridCols === 3} onClick={() => { setGridCols(3); localStorage.setItem('gridCols', '3'); }} icon={<Table size={13} />} label="3" />
+                  <GridButton active={gridCols === 4} onClick={() => { setGridCols(4); localStorage.setItem('gridCols', '4'); }} icon={<Grid3x3 size={13} />} label="4" />
+                  <GridButton active={gridCols === 5} onClick={() => { setGridCols(5); localStorage.setItem('gridCols', '5'); }} icon={<LayoutGrid size={13} />} label="5" />
+                </div>
+              )}
             </div>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
@@ -434,9 +488,15 @@ const Dashboard = () => {
                     <Pin size={12} />
                     Pinned
                   </p>
-                  <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
-                    {pinnedNotes.map(renderCard)}
-                  </div>
+                  {layoutMode === 'grid' ? (
+                    <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
+                      {pinnedNotes.map(renderCard)}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {pinnedNotes.map(renderBar)}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -447,9 +507,15 @@ const Dashboard = () => {
                       Other Notes
                     </p>
                   )}
-                  <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
-                    {otherNotes.map(renderCard)}
-                  </div>
+                  {layoutMode === 'grid' ? (
+                    <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
+                      {otherNotes.map(renderCard)}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {otherNotes.map(renderBar)}
+                    </div>
+                  )}
                 </div>
               )}
             </>
