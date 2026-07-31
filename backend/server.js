@@ -9,6 +9,7 @@ const aiRoutes = require('./routes/aiRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const userRoutes = require('./routes/userRoutes');
 const collectionRoutes = require('./routes/collectionRoutes');
+const whiteboardRoutes = require('./routes/whiteboardRoutes');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/collections', collectionRoutes);
+app.use('/api/whiteboards', whiteboardRoutes);
 
 app.get('/', (req, res) => {
   res.send('NextGenNote API is running');

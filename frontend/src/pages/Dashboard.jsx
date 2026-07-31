@@ -1,6 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles, Trash2, FolderPlus, Pin, Plus, Grid2x2, Grid3x3, LayoutGrid, Table, Rows3 } from "lucide-react";
+import {
+  Search,
+  Sparkles,
+  Trash2,
+  FolderPlus,
+  Pin,
+  Plus,
+  Grid2x2,
+  Grid3x3,
+  LayoutGrid,
+  Table,
+  Rows3,
+} from "lucide-react";
 import { AuthContext } from "../context/AuthContextStore";
 import {
   getNotes,
@@ -79,12 +91,12 @@ const Dashboard = () => {
   const [addNotesModalOpen, setAddNotesModalOpen] = useState(false);
   const [allNotesForPicker, setAllNotesForPicker] = useState([]);
   const [gridCols, setGridCols] = useState(() => {
-    const saved = localStorage.getItem('gridCols');
+    const saved = localStorage.getItem("gridCols");
     return saved ? Number(saved) : 3;
   });
   const [layoutMode, setLayoutMode] = useState(() => {
-  return localStorage.getItem('layoutMode') || 'bars';
-});
+    return localStorage.getItem("layoutMode") || "bars";
+  });
   const navigate = useNavigate();
 
   const fetchNotes = async (view) => {
@@ -142,7 +154,9 @@ const Dashboard = () => {
     try {
       const res = await getNotes({ filter: "all" });
       const currentCollId = activeView.replace("collection:", "");
-      setAllNotesForPicker(res.data.filter((n) => n.collectionId !== currentCollId));
+      setAllNotesForPicker(
+        res.data.filter((n) => n.collectionId !== currentCollId),
+      );
     } catch (err) {
       console.error("Failed to fetch notes for picker", err);
     }
@@ -184,7 +198,10 @@ const Dashboard = () => {
   const addToRecent = (note) => {
     setRecentNotes((prev) => {
       const filtered = prev.filter((n) => n._id !== note._id);
-      const updated = [{ _id: note._id, title: note.title }, ...filtered].slice(0, 5);
+      const updated = [{ _id: note._id, title: note.title }, ...filtered].slice(
+        0,
+        5,
+      );
       localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
       return updated;
     });
@@ -291,13 +308,13 @@ const Dashboard = () => {
 
   const handleSetLayoutMode = (mode) => {
     setLayoutMode(mode);
-    localStorage.setItem('layoutMode', mode);
+    localStorage.setItem("layoutMode", mode);
   };
 
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase())
+      note.content.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const pinnedNotes = filteredNotes.filter((n) => n.isPinned);
@@ -359,17 +376,22 @@ const Dashboard = () => {
         notifications={notifications}
         onDelete={handleDeleteNotification}
         onClearAll={handleClearAllNotifications}
-        positionClass={collapsed ? "left-2 sm:left-[80px]" : "left-2 sm:left-[272px]"}
+        positionClass={
+          collapsed ? "left-2 sm:left-[80px]" : "left-2 sm:left-[272px]"
+        }
       />
 
       <main className="flex-1 overflow-y-auto pb-20 sm:pb-0">
         {/* Topbar */}
-        <div className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-transparent">
+        {/* Topbar */}
+        <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0a0a10]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-fuchsia-500 flex items-center justify-center text-lg">
               📝
             </div>
-            <span className="font-semibold text-gray-900 dark:text-white">NextGenNotes</span>
+            <span className="font-semibold text-gray-900 dark:text-white">
+              NextGenNotes
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -405,32 +427,35 @@ const Dashboard = () => {
           {/* Heading row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              {activeCollection ? activeCollection.name : VIEW_LABELS[activeView]}
+              {activeCollection
+                ? activeCollection.name
+                : VIEW_LABELS[activeView]}
               <span className="block sm:inline sm:ml-2 text-sm sm:text-base font-normal text-gray-400 dark:text-gray-500">
-                {activeCollection ? '' : '— '}{greeting}, {user?.name}
+                {activeCollection ? "" : "— "}
+                {greeting}, {user?.name}
               </span>
             </h1>
             <div className="flex items-center gap-2">
               {/* Layout mode toggle: grid vs bars */}
               <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1">
                 <button
-                  onClick={() => handleSetLayoutMode('grid')}
+                  onClick={() => handleSetLayoutMode("grid")}
                   title="Grid view"
                   className={`flex items-center justify-center p-1.5 rounded-md transition-colors ${
-                    layoutMode === 'grid'
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+                    layoutMode === "grid"
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10"
                   }`}
                 >
                   <Grid3x3 size={14} />
                 </button>
                 <button
-                  onClick={() => handleSetLayoutMode('bars')}
+                  onClick={() => handleSetLayoutMode("bars")}
                   title="Bar list view"
                   className={`flex items-center justify-center p-1.5 rounded-md transition-colors ${
-                    layoutMode === 'bars'
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+                    layoutMode === "bars"
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10"
                   }`}
                 >
                   <Rows3 size={14} />
@@ -438,18 +463,51 @@ const Dashboard = () => {
               </div>
 
               {/* Grid density — only relevant in grid mode, desktop only */}
-              {layoutMode === 'grid' && (
+              {layoutMode === "grid" && (
                 <div className="hidden lg:flex items-center gap-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1">
-                  <GridButton active={gridCols === 2} onClick={() => { setGridCols(2); localStorage.setItem('gridCols', '2'); }} icon={<Grid2x2 size={13} />} label="2" />
-                  <GridButton active={gridCols === 3} onClick={() => { setGridCols(3); localStorage.setItem('gridCols', '3'); }} icon={<Table size={13} />} label="3" />
-                  <GridButton active={gridCols === 4} onClick={() => { setGridCols(4); localStorage.setItem('gridCols', '4'); }} icon={<Grid3x3 size={13} />} label="4" />
-                  <GridButton active={gridCols === 5} onClick={() => { setGridCols(5); localStorage.setItem('gridCols', '5'); }} icon={<LayoutGrid size={13} />} label="5" />
+                  <GridButton
+                    active={gridCols === 2}
+                    onClick={() => {
+                      setGridCols(2);
+                      localStorage.setItem("gridCols", "2");
+                    }}
+                    icon={<Grid2x2 size={13} />}
+                    label="2"
+                  />
+                  <GridButton
+                    active={gridCols === 3}
+                    onClick={() => {
+                      setGridCols(3);
+                      localStorage.setItem("gridCols", "3");
+                    }}
+                    icon={<Table size={13} />}
+                    label="3"
+                  />
+                  <GridButton
+                    active={gridCols === 4}
+                    onClick={() => {
+                      setGridCols(4);
+                      localStorage.setItem("gridCols", "4");
+                    }}
+                    icon={<Grid3x3 size={13} />}
+                    label="4"
+                  />
+                  <GridButton
+                    active={gridCols === 5}
+                    onClick={() => {
+                      setGridCols(5);
+                      localStorage.setItem("gridCols", "5");
+                    }}
+                    icon={<LayoutGrid size={13} />}
+                    label="5"
+                  />
                 </div>
               )}
             </div>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
-            {filteredNotes.length} note{filteredNotes.length !== 1 ? 's' : ''} · {pinnedNotes.length} pinned
+            {filteredNotes.length} note{filteredNotes.length !== 1 ? "s" : ""} ·{" "}
+            {pinnedNotes.length} pinned
           </p>
 
           {activeView === "trash" && counts.trash > 0 && (
@@ -464,7 +522,10 @@ const Dashboard = () => {
 
           {activeCollection && (
             <button
-              onClick={() => { fetchAllNotesForPicker(); setAddNotesModalOpen(true); }}
+              onClick={() => {
+                fetchAllNotesForPicker();
+                setAddNotesModalOpen(true);
+              }}
               className="flex items-center gap-1.5 text-sm text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50 rounded-lg px-3 py-1.5 hover:bg-purple-50 dark:hover:bg-purple-950/30 mb-6"
             >
               <FolderPlus size={14} />
@@ -488,7 +549,7 @@ const Dashboard = () => {
                     <Pin size={12} />
                     Pinned
                   </p>
-                  {layoutMode === 'grid' ? (
+                  {layoutMode === "grid" ? (
                     <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
                       {pinnedNotes.map(renderCard)}
                     </div>
@@ -507,14 +568,12 @@ const Dashboard = () => {
                       Other Notes
                     </p>
                   )}
-                  {layoutMode === 'grid' ? (
+                  {layoutMode === "grid" ? (
                     <div className={`grid ${GRID_CLASSES[gridCols]} gap-4`}>
                       {otherNotes.map(renderCard)}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {otherNotes.map(renderBar)}
-                    </div>
+                    <div className="space-y-2">{otherNotes.map(renderBar)}</div>
                   )}
                 </div>
               )}
@@ -580,8 +639,8 @@ const Dashboard = () => {
         onAICanvasClick={() => setAiCanvasOpen((prev) => !prev)}
         collections={collections}
         onNewWorkspace={() => setCollectionModalOpen(true)}
-        onSettingsClick={() => navigate('/settings')}
-        onConnectionsClick={() => navigate('/connections')}
+        onSettingsClick={() => navigate("/settings")}
+        onConnectionsClick={() => navigate("/connections")}
       />
     </div>
   );
@@ -593,8 +652,8 @@ const GridButton = ({ active, onClick, icon, label }) => (
     title={`${label} per row`}
     className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md transition-colors ${
       active
-        ? 'bg-purple-600 text-white'
-        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+        ? "bg-purple-600 text-white"
+        : "text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10"
     }`}
   >
     {icon}

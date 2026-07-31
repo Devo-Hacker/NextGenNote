@@ -10,6 +10,7 @@ import Settings from "./pages/Settings";
 import ProfileSettings from "./pages/ProfileSettings";
 import ConnectingThoughts from "./pages/ConnectingThoughts";
 import Landing from "./pages/Landing";
+import Whiteboard from './pages/Whiteboard';
 
 function App() {
   return (
@@ -70,6 +71,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+  path="/whiteboard/new"
+  element={
+    <ProtectedRoute>
+      <Whiteboard />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/whiteboard/:id"
+  element={
+    <ProtectedRoute>
+      <Whiteboard />
+    </ProtectedRoute>
+  }
+/>
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </AuthProvider>
