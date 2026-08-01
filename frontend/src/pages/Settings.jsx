@@ -59,7 +59,14 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0710] relative overflow-hidden transition-colors">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0710] relative overflow-hidden transition-colors">
+      {/*
+        These custom classes hold colors that Tailwind's `dark:` variant
+        can't reach (rgba values, backdrop-filter). They mirror Tailwind's
+        own class strategy: light values by default, `.dark` ancestor
+        overrides for dark mode — so they track the same "dark" class
+        your ThemeContext toggles everywhere else in the app.
+      */}
       <style>{`
         .settings-glow {
           position: absolute;
@@ -68,11 +75,19 @@ const Settings = () => {
           pointer-events: none;
         }
         .settings-panel {
-          background: rgba(168, 85, 247, 0.06);
-          border: 1px solid rgba(168, 85, 247, 0.15);
+          background: rgba(168, 85, 247, 0.05);
+          border: 1px solid rgba(168, 85, 247, 0.16);
           backdrop-filter: blur(14px);
         }
+        .dark .settings-panel {
+          background: rgba(168, 85, 247, 0.06);
+          border: 1px solid rgba(168, 85, 247, 0.15);
+        }
         .settings-field {
+          background: rgba(255, 255, 255, 0.9);
+          border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+        .dark .settings-field {
           background: rgba(168, 85, 247, 0.08);
           border: 1px solid rgba(168, 85, 247, 0.18);
         }
@@ -82,37 +97,37 @@ const Settings = () => {
         }
       `}</style>
 
-      <div className="settings-glow w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] bg-purple-700/25 -top-24 -left-24" />
-      <div className="settings-glow w-[200px] h-[200px] sm:w-[360px] sm:h-[360px] bg-fuchsia-700/15 bottom-0 right-0" />
+      <div className="settings-glow w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] bg-purple-300/25 dark:bg-purple-700/25 -top-24 -left-24" />
+      <div className="settings-glow w-[200px] h-[200px] sm:w-[360px] sm:h-[360px] bg-fuchsia-300/20 dark:bg-fuchsia-700/15 bottom-0 right-0" />
 
       <div className="relative max-w-2xl mx-auto px-4 sm:px-8 py-5 sm:py-6">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft size={16} />
             Back
           </button>
           {saved && (
-            <span className="flex items-center gap-1 text-xs text-purple-300">
+            <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300">
               <Check size={12} />
               Saved
             </span>
           )}
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-semibold text-white mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6 sm:mb-8">
           Settings
         </h1>
 
         <div className="space-y-4">
           {/* Dashboard greeting */}
           <section className="settings-panel rounded-xl p-4 sm:p-5">
-            <h2 className="font-semibold text-white mb-1">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-1">
               Dashboard greeting
             </h2>
-            <p className="text-xs text-purple-200/50 mb-4">
+            <p className="text-xs text-purple-900/50 dark:text-purple-200/50 mb-4">
               Customize the greeting shown on your dashboard
             </p>
             <input
@@ -121,16 +136,16 @@ const Settings = () => {
               onChange={(e) => setGreeting(e.target.value)}
               onBlur={handleGreetingBlur}
               placeholder="Hola"
-              className="settings-field w-full text-sm text-white rounded-lg px-3 py-2.5 outline-none placeholder-purple-200/30 focus:border-purple-400 transition-colors"
+              className="settings-field w-full text-sm text-gray-900 dark:text-white rounded-lg px-3 py-2.5 outline-none placeholder-purple-900/30 dark:placeholder-purple-200/30 focus:border-purple-400 transition-colors"
             />
           </section>
 
           {/* Avatar */}
           <section className="settings-panel rounded-xl p-4 sm:p-5">
-            <h2 className="font-semibold text-white mb-1">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-1">
               Profile picture
             </h2>
-            <p className="text-xs text-purple-200/50 mb-4">
+            <p className="text-xs text-purple-900/50 dark:text-purple-200/50 mb-4">
               Pick an avatar for your profile
             </p>
             <div className="flex flex-wrap gap-2.5 sm:gap-3">
@@ -141,7 +156,7 @@ const Settings = () => {
                   className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl border-2 transition-colors ${
                     avatar === key
                       ? "border-purple-400 bg-purple-500/20 shadow-[0_0_12px_rgba(168,85,247,0.5)]"
-                      : "border-transparent bg-white/5 hover:border-purple-500/40"
+                      : "border-transparent bg-black/5 dark:bg-white/5 hover:border-purple-500/40"
                   }`}
                 >
                   {emoji}
@@ -152,18 +167,18 @@ const Settings = () => {
 
           {/* Appearance */}
           <section className="settings-panel rounded-xl p-4 sm:p-5">
-            <h2 className="font-semibold text-white mb-4">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">
               Appearance
             </h2>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-purple-100/80">
+              <div className="flex items-center gap-2 text-sm text-purple-900/80 dark:text-purple-100/80">
                 {darkMode ? <Moon size={16} /> : <Sun size={16} />}
                 {darkMode ? "Dark mode" : "Light mode"}
               </div>
               <button
                 onClick={handleToggleDarkMode}
                 className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                  darkMode ? "settings-toggle-on" : "bg-white/10"
+                  darkMode ? "settings-toggle-on" : "bg-gray-300 dark:bg-white/10"
                 }`}
               >
                 <span
@@ -177,11 +192,11 @@ const Settings = () => {
 
           {/* Notifications */}
           <section className="settings-panel rounded-xl p-4 sm:p-5">
-            <h2 className="font-semibold text-white mb-4">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">
               Notifications
             </h2>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-purple-100/80">
+              <div className="flex items-center gap-2 text-sm text-purple-900/80 dark:text-purple-100/80">
                 {notificationsEnabled ? (
                   <Bell size={16} />
                 ) : (
@@ -192,7 +207,7 @@ const Settings = () => {
               <button
                 onClick={handleToggleNotifications}
                 className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                  notificationsEnabled ? "settings-toggle-on" : "bg-white/10"
+                  notificationsEnabled ? "settings-toggle-on" : "bg-gray-300 dark:bg-white/10"
                 }`}
               >
                 <span

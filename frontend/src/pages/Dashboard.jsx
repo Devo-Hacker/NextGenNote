@@ -641,6 +641,8 @@ const Dashboard = () => {
         onNewWorkspace={() => setCollectionModalOpen(true)}
         onSettingsClick={() => navigate("/settings")}
         onConnectionsClick={() => navigate("/connections")}
+        onDevModeClick={() => navigate("/devmode")}
+        onDeleteCollection={setCollectionToDelete}
       />
     </div>
   );

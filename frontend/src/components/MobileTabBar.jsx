@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import {
   Home, Sparkles, Bell, Menu, X,
-  Star, Archive, Trash2, Settings, Network, Plus, Hash,
+  Star, Archive, Trash2, Settings, Network, Plus, Hash, Code2,
 } from 'lucide-react';
 
 const MobileTabBar = ({
   activeView, onViewChange, counts, notificationCount,
   onNotificationsClick, onAICanvasClick, collections,
-  onNewWorkspace, onSettingsClick, onConnectionsClick,
+  onNewWorkspace, onSettingsClick, onConnectionsClick, onDevModeClick,
+  onDeleteCollection = () => {},
 }) => {
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -73,14 +74,22 @@ const MobileTabBar = ({
                 All Notes
               </button>
               {collections.map((c) => (
-                <button
-                  key={c._id}
-                  onClick={() => go(`collection:${c._id}`)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
-                  {c.name}
-                </button>
+                <div key={c._id} className="flex items-center gap-1">
+                  <button
+                    onClick={() => go(`collection:${c._id}`)}
+                    className="flex-1 min-w-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                    <span className="truncate">{c.name}</span>
+                  </button>
+                  <button
+                    onClick={() => { onDeleteCollection(c); setMoreOpen(false); }}
+                    title={`Delete ${c.name}`}
+                    className="shrink-0 p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               ))}
               <button
                 onClick={() => { onNewWorkspace(); setMoreOpen(false); }}
@@ -98,6 +107,13 @@ const MobileTabBar = ({
               >
                 <Network size={16} />
                 Connecting Thoughts
+              </button>
+              <button
+                onClick={() => { onDevModeClick(); setMoreOpen(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <Code2 size={16} />
+                Developer Mode
               </button>
               <button
                 onClick={() => { onSettingsClick(); setMoreOpen(false); }}
