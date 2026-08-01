@@ -61,6 +61,9 @@ The home base. A collapsible sidebar (desktop) or bottom tab bar (mobile) for na
 
 ### 4. Developers Mode
 
+
+<img width="1048" height="642" alt="image" src="https://github.com/user-attachments/assets/ebce2b5d-012e-4415-882c-19d052d9220d" />
+
 ### 5. Note Editor
 Notes open in **view mode** by default (read-only) and only become editable after explicitly clicking **Edit** — this prevents accidental edits from a stray click. From the editor, a note can be saved, archived, linked to other notes, or assigned to a collection. New notes are drafts until the user actually writes something and saves — nothing is persisted to the database on a blank "New Note" click.
 
@@ -68,6 +71,8 @@ Notes open in **view mode** by default (read-only) and only become editable afte
 
 ### 6. AI Canvas
 The signature feature. A togglable panel (side panel on desktop, full-screen sheet on mobile/tablet) where the user picks a mood chip and describes what's on their mind. That prompt is sent to a Groq-hosted Llama 3.3 70B model with a system prompt engineered to produce a warm, human-sounding reflective journal entry — not a clinical AI summary. The generated text can be saved directly as a note, tagged with the mood and an "AI Generated" badge.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/06304114-5a85-46d5-933f-da0498b90a2e" />
 
 ### 7. Collections
 User-created groupings (e.g., "DSA," "Mood," "Reading List") each with a custom accent color. Notes inside a collection render with a colored top border matching that collection. Notes can be created directly inside a collection, or added to one after the fact via an "Add existing note" picker.
