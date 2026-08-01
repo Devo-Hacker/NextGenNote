@@ -10,7 +10,7 @@ import Settings from "./pages/Settings";
 import ProfileSettings from "./pages/ProfileSettings";
 import ConnectingThoughts from "./pages/ConnectingThoughts";
 import Landing from "./pages/Landing";
-import Whiteboard from './pages/Whiteboard';
+import DevMode from "./pages/DevMode";
 
 function App() {
   return (
@@ -21,7 +21,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            
+
             <Route
               path="/dashboard"
               element={
@@ -38,7 +38,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route
+              path="/notes/new"
+              element={
+                <ProtectedRoute>
+                  <NoteEditor />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/settings"
               element={
@@ -64,29 +71,14 @@ function App() {
               }
             />
             <Route
-              path="/notes/new"
+              path="/devmode"
               element={
                 <ProtectedRoute>
-                  <NoteEditor />
+                  <DevMode />
                 </ProtectedRoute>
               }
             />
-            <Route
-  path="/whiteboard/new"
-  element={
-    <ProtectedRoute>
-      <Whiteboard />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/whiteboard/:id"
-  element={
-    <ProtectedRoute>
-      <Whiteboard />
-    </ProtectedRoute>
-  }
-/>
+
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </AuthProvider>

@@ -1,7 +1,7 @@
 import {
   Star, Archive, Trash2, Bell, Settings, Plus,
   ChevronDown, ChevronRight, Hash, FileText,
-  PanelLeft, PanelLeftClose, X, Network, PenTool,
+  PanelLeft, PanelLeftClose, X, Network, Code2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -128,11 +128,11 @@ const Sidebar = ({
               <span>Connecting Thoughts</span>
             </button>
             <button
-              onClick={() => navigate('/whiteboard/new')}
+              onClick={() => navigate('/devmode')}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 text-gray-700 dark:text-gray-300"
             >
-              <PenTool size={16} />
-              <span>Whiteboard</span>
+              <Code2 size={16} />
+              <span>Developer Mode</span>
             </button>
           </div>
 
