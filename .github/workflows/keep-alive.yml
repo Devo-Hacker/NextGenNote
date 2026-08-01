@@ -1,0 +1,17 @@
+name: Keep Render backend awake
+
+on:
+  schedule:
+    # Runs every 14 minutes — under Render's 15-minute idle-sleep window.
+    - cron: '*/14 * * * *'
+  workflow_dispatch: {} # lets you trigger it manually from the Actions tab to test
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        run: |
+          curl -sf --max-time 20 "${{ secrets.RENDER_BACKEND_URL }}/health" \
+            && echo "Backend responded OK" \
+            || (echo "Ping failed" && exit 1)
