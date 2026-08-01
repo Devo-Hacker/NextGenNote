@@ -33,6 +33,7 @@ The result is a note-taking app with four pillars that don't typically coexist i
 - **A real, working AI co-writer** (AI Canvas) that turns a described emotion into a genuine reflective journal entry — not a gimmick, an actual Groq-powered LLM call with a carefully engineered system prompt
 - **A knowledge graph** (Connecting Thoughts) that visualizes how your notes relate to each other, using a custom-built force-directed physics simulation — no external graph library
 - **Organizational depth** — collections with custom colors, pinning, archiving, soft-delete trash with recovery, and full-text search — all built on top of a single flexible Note schema
+- **Developers Mode** where you can store and analyze your code properly you could convert it to your own respective language along with learning through workflows and commands. 
 - **A production-grade auth & UX layer** — JWT sessions with real expiry checking, multi-account switching on one device, dark mode, customizable greetings/avatars, and a fully responsive layout that adapts from a 4K desktop down to a 360px phone screen with a native-feeling bottom tab bar
 
 ---
@@ -49,38 +50,43 @@ The first thing a new, logged-out visitor sees. A marketing-style hero section e
 ### 2. Authentication
 Glassmorphic split-screen Login and Signup pages, each with a dark animated brand panel on the left (desktop only) and a frosted-glass form card on the right. Sessions persist for 7 days via JWT; after that, the token is detected as expired on load and the user is transparently returned to the Landing page rather than seeing a broken dashboard.
 
-<img width="1901" height="905" alt="Screenshot 2026-07-24 135048" src="https://github.com/user-attachments/assets/9760cf20-b1d1-4500-9445-615b004f5e19" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/88467357-682a-463a-8be8-0328fa787547" />
 
 ### 3. Dashboard
 The home base. A collapsible sidebar (desktop) or bottom tab bar (mobile) for navigation between All Notes, Starred, Archive, Trash, and custom Collections. Notes render as gradient purple cards, split into **Pinned** and **Other Notes** sections, with a live search bar and a 3/4/5-column density toggle on wide screens.
 
+<img width="1920" height="1080" alt="Screenshot (1743)" src="https://github.com/user-attachments/assets/0f1ba443-685f-42f5-ab42-c5b03de05856" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8d7bce67-9a54-4723-aa5c-5e2746fb7765" />
+<img width="1920" height="1080" alt="Screenshot (1744)" src="https://github.com/user-attachments/assets/cc8f120e-0d96-425c-8e0b-70a465a00caa" />
 
-### 4. Note Editor
+### 4. Developers Mode
+
+### 5. Note Editor
 Notes open in **view mode** by default (read-only) and only become editable after explicitly clicking **Edit** — this prevents accidental edits from a stray click. From the editor, a note can be saved, archived, linked to other notes, or assigned to a collection. New notes are drafts until the user actually writes something and saves — nothing is persisted to the database on a blank "New Note" click.
 
 <img width="1917" height="908" alt="Screenshot 2026-07-24 135118" src="https://github.com/user-attachments/assets/4091347d-d765-4f7f-b250-b1ef57b1a710" />
 
-### 5. AI Canvas
+### 6. AI Canvas
 The signature feature. A togglable panel (side panel on desktop, full-screen sheet on mobile/tablet) where the user picks a mood chip and describes what's on their mind. That prompt is sent to a Groq-hosted Llama 3.3 70B model with a system prompt engineered to produce a warm, human-sounding reflective journal entry — not a clinical AI summary. The generated text can be saved directly as a note, tagged with the mood and an "AI Generated" badge.
 
-### 6. Collections
+### 7. Collections
 User-created groupings (e.g., "DSA," "Mood," "Reading List") each with a custom accent color. Notes inside a collection render with a colored top border matching that collection. Notes can be created directly inside a collection, or added to one after the fact via an "Add existing note" picker.
 
 <img width="1917" height="911" alt="Screenshot 2026-07-24 134952" src="https://github.com/user-attachments/assets/526056fc-9706-4d77-b90f-eba6aa236c44" />
 
-### 7. Connecting Thoughts
+### 8. Connecting Thoughts
 An Obsidian-style knowledge graph. Every note is a node; explicit links between notes (created from inside the editor) are edges. Nodes glow more intensely the more connections they have ("hub" notes), and the whole graph is rendered as an interactive, draggable force-directed simulation built entirely in raw SVG + `requestAnimationFrame` — no D3, no graph library. Includes filters for "Strong Links" (2+ connections) and "Orphan Nodes" (zero connections), plus live stats (Total Notes, Connections, Clusters).
 
-### 8. Notifications
+### 9. Notifications
 A real-time-feeling activity log: "First note created!", "You pinned a note!", "You archived a note!", etc. — triggered server-side any time a relevant action occurs, with per-item delete and a "Clear all" action, respecting a user-level notification on/off toggle in Settings.
 
 <img width="1911" height="913" alt="Screenshot 2026-07-24 135159" src="https://github.com/user-attachments/assets/013b6d12-2611-41e9-a3ee-ccc0797501b3" />
 <img width="1895" height="915" alt="Screenshot 2026-07-24 135144" src="https://github.com/user-attachments/assets/5d986dd8-d7f2-4bd2-aae5-f3987dcde151" />
 
-### 9. Settings & Profile
+### 10. Settings & Profile
 Dark/light mode toggle, notification toggle, a 7-avatar picker, a customizable dashboard greeting (default "Hola"), and a full Profile page with editable display name, account verification badge, and **multi-account switching** — the app remembers every account a user has logged into on that device and lets them swap between them without re-entering a password.
 
-### 10. Mobile Experience
+### 12. Mobile Experience
 Below the `sm` breakpoint, the sidebar disappears entirely in favor of a bottom tab bar (Notes / AI / Alerts / More), with a slide-up sheet for secondary navigation (Starred/Archive/Trash, Workspace, Connecting Thoughts, Settings). The AI Canvas becomes a full-screen sheet through tablet widths. The Connecting Thoughts graph gets a collapsible filter drawer instead of a fixed side panel, and node-dragging supports real touch events, not just mouse.
 
 ---
