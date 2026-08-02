@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Sparkles, Pencil, Trash2, Pin, Archive, RotateCcw } from 'lucide-react';
+import { blocksToPlainText } from '../utils/noteContent';
 
 const NoteCard = ({ note, view, accentColor, onClick, onEdit, onPin, onArchive, onRestore, onDeleteRequest }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,6 +29,8 @@ const NoteCard = ({ note, view, accentColor, onClick, onEdit, onPin, onArchive, 
     setMenuOpen(false);
     fn(note);
   };
+
+  const previewText = note.content ? blocksToPlainText(note.content).trim() : '';
 
   return (
     <div
@@ -60,7 +63,7 @@ const NoteCard = ({ note, view, accentColor, onClick, onEdit, onPin, onArchive, 
           </div>
         </div>
         <p className="text-sm text-gray-600 dark:text-purple-100/70 line-clamp-4">
-          {note.content || 'No content yet...'}
+          {previewText || 'No content yet...'}
         </p>
         {note.mood && <span className="text-xs text-purple-500 dark:text-fuchsia-300 mt-1 block">{note.mood}</span>}
       </div>
