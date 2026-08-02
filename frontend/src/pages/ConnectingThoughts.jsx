@@ -170,15 +170,15 @@ const ConnectingThoughts = () => {
 
   const PanelContent = () => (
     <>
-      <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">View</p>
+      <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-500 uppercase mb-2">View</p>
       <div className="space-y-1 mb-6">
         <ViewButton active={view === 'all'} onClick={() => setView('all')} icon={<Share2 size={13} />} label="All Connections" />
         <ViewButton active={view === 'strong'} onClick={() => setView('strong')} icon={<Zap size={13} />} label="Strong Links" />
         <ViewButton active={view === 'orphan'} onClick={() => setView('orphan')} icon={<Circle size={13} />} label="Orphan Nodes" />
       </div>
 
-      <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">Legend</p>
-      <div className="space-y-2 mb-6 text-xs text-gray-400">
+      <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-500 uppercase mb-2">Legend</p>
+      <div className="space-y-2 mb-6 text-xs text-gray-600 dark:text-gray-400">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-purple-500 glow-node-hub" />
           Hub node
@@ -193,16 +193,16 @@ const ConnectingThoughts = () => {
         </div>
       </div>
 
-      <p className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase mb-2">Recent</p>
+      <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-500 uppercase mb-2">Recent</p>
       <div className="space-y-1">
-        {recentNodes.length === 0 && <p className="text-xs text-gray-600">No notes yet</p>}
+        {recentNodes.length === 0 && <p className="text-xs text-gray-500 dark:text-gray-600">No notes yet</p>}
         {recentNodes.map((n) => (
           <button
             key={n.id}
             onClick={() => { setMobilePanelOpen(false); navigate(`/notes/${n.id}`, { state: { from: 'connections' } }); }}
-            className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded-md hover:bg-white/5 text-xs text-gray-300 truncate"
+            className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-xs text-gray-700 dark:text-gray-300 truncate"
           >
-            <FileText size={12} className="text-gray-500 shrink-0" />
+            <FileText size={12} className="text-gray-500 dark:text-gray-500 shrink-0" />
             <span className="truncate">{n.title}</span>
           </button>
         ))}
@@ -211,24 +211,24 @@ const ConnectingThoughts = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a10] text-gray-900 dark:text-white transition-colors">
       <style>{`
         .glow-node { filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.7)); }
         .glow-node-hub { filter: drop-shadow(0 0 14px rgba(168, 85, 247, 0.9)); }
       `}</style>
 
       {/* Top bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-white/10">
         <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft size={16} />
             Back
           </button>
-          <div className="flex items-center gap-2 text-white font-semibold text-sm sm:text-base">
-            <Share2 size={16} className="text-purple-400" />
+          <div className="flex items-center gap-2 text-gray-900 dark:text-white font-semibold text-sm sm:text-base">
+            <Share2 size={16} className="text-purple-500 dark:text-purple-400" />
             <span className="hidden xs:inline">Connecting Thoughts</span>
             <span className="xs:hidden">Connections</span>
           </div>
@@ -243,7 +243,7 @@ const ConnectingThoughts = () => {
 
           <button
             onClick={() => setMobilePanelOpen(true)}
-            className="lg:hidden flex items-center gap-1.5 text-xs text-gray-300 bg-white/5 border border-white/10 rounded-lg px-3 py-2"
+            className="lg:hidden flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2"
           >
             <SlidersHorizontal size={14} />
           </button>
@@ -259,7 +259,7 @@ const ConnectingThoughts = () => {
       </div>
 
       {/* Mobile stat pills row */}
-      <div className="flex sm:hidden items-center gap-2 px-4 py-2 overflow-x-auto border-b border-white/10">
+      <div className="flex sm:hidden items-center gap-2 px-4 py-2 overflow-x-auto border-b border-gray-200 dark:border-white/10">
         <StatPill icon={<FileText size={13} />} value={nodes.length} label="Notes" />
         <StatPill icon={<Zap size={13} />} value={edges.length} label="Links" />
         <StatPill icon={<Circle size={13} />} value={clusterCount} label="Clusters" />
@@ -267,7 +267,7 @@ const ConnectingThoughts = () => {
 
       <div className="flex">
         {/* Left panel — desktop only */}
-        <div className="hidden lg:block w-56 shrink-0 border-r border-white/10 px-4 py-5">
+        <div className="hidden lg:block w-56 shrink-0 border-r border-gray-200 dark:border-white/10 px-4 py-5">
           <PanelContent />
         </div>
 
@@ -277,11 +277,11 @@ const ConnectingThoughts = () => {
             <div className="absolute inset-0 bg-black/50" />
             <div
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-0 right-0 bg-[#0d0d14] border-t border-white/10 rounded-t-2xl p-4 max-h-[70vh] overflow-y-auto"
+              className="absolute bottom-0 left-0 right-0 bg-white dark:bg-[#0d0d14] border-t border-gray-200 dark:border-white/10 rounded-t-2xl p-4 max-h-[70vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto" />
-                <button onClick={() => setMobilePanelOpen(false)} className="absolute right-4 text-gray-400 hover:text-white">
+                <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto" />
+                <button onClick={() => setMobilePanelOpen(false)} className="absolute right-4 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                   <X size={18} />
                 </button>
               </div>
@@ -293,13 +293,13 @@ const ConnectingThoughts = () => {
         {/* Graph */}
         <div className="flex-1 p-3 sm:p-6">
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading your thought graph...</p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm">Loading your thought graph...</p>
           ) : nodes.length === 0 ? (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-500 text-sm">
               No notes to connect yet. Create some notes first, then link them from inside the editor.
             </p>
           ) : (
-            <div className="bg-[#0d0d14] border border-white/10 rounded-2xl overflow-hidden">
+            <div className="bg-white dark:bg-[#0d0d14] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden">
               <svg
                 viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
                 className="w-full h-[360px] sm:h-[480px] lg:h-[560px] cursor-grab touch-none"
@@ -356,7 +356,7 @@ const ConnectingThoughts = () => {
                         textAnchor="middle"
                         fontSize={11}
                         fontWeight={isHub ? 600 : 400}
-                        className="fill-gray-200 pointer-events-none select-none"
+                        className="fill-gray-700 dark:fill-gray-200 pointer-events-none select-none"
                       >
                         {n.title}
                       </text>
@@ -367,7 +367,7 @@ const ConnectingThoughts = () => {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-1 text-xs text-gray-500">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-1 text-xs text-gray-500 dark:text-gray-500">
             <span>Drag nodes to rearrange. Tap a node to open that note.</span>
             <span className="hidden sm:inline">Scroll to zoom · Drag to pan</span>
           </div>
@@ -378,10 +378,10 @@ const ConnectingThoughts = () => {
 };
 
 const StatPill = ({ icon, value, label }) => (
-  <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs shrink-0">
-    <span className="text-purple-400">{icon}</span>
-    <span className="font-semibold text-white">{value}</span>
-    <span className="text-gray-400">{label}</span>
+  <div className="flex items-center gap-1.5 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs shrink-0">
+    <span className="text-purple-500 dark:text-purple-400">{icon}</span>
+    <span className="font-semibold text-gray-900 dark:text-white">{value}</span>
+    <span className="text-gray-500 dark:text-gray-400">{label}</span>
   </div>
 );
 
@@ -391,7 +391,7 @@ const ViewButton = ({ active, onClick, icon, label }) => (
     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
       active
         ? 'bg-purple-600/90 text-white'
-        : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+        : 'text-gray-500 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
     }`}
   >
     {icon}

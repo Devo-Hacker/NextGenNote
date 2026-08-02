@@ -167,8 +167,8 @@ const NoteEditor = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a10]">
-        <p className="text-gray-500 text-sm">Loading note...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0a0a10]">
+        <p className="text-gray-500 dark:text-gray-500 text-sm">Loading note...</p>
       </div>
     );
   }
@@ -176,17 +176,27 @@ const NoteEditor = () => {
   const isEditing = mode === 'edit';
 
   return (
-    <div className="min-h-screen bg-[#0a0a10] relative overflow-hidden flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a10] relative overflow-hidden flex items-center justify-center px-4 py-8 transition-colors">
       <style>{`
         .neon-glow-bg { position: absolute; border-radius: 9999px; filter: blur(90px); pointer-events: none; }
-        .neon-panel { background: rgba(20, 20, 28, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); box-shadow: 0 0 40px rgba(168, 85, 247, 0.08), 0 8px 32px rgba(0,0,0,0.4); }
+        .neon-panel {
+          background: rgba(255, 255, 255, 0.75);
+          border: 1px solid rgba(0, 0, 0, 0.06);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 0 40px rgba(168, 85, 247, 0.06), 0 8px 32px rgba(0,0,0,0.06);
+        }
+        .dark .neon-panel {
+          background: rgba(20, 20, 28, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 0 40px rgba(168, 85, 247, 0.08), 0 8px 32px rgba(0,0,0,0.4);
+        }
         .neon-underline { background: linear-gradient(90deg, #c084fc 0%, #f472b6 100%); }
         .neon-save-btn { background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); box-shadow: 0 4px 14px rgba(216, 70, 200, 0.35); }
       `}</style>
 
-      <div className="neon-glow-bg w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] bg-purple-500/20 -top-20 -left-20" />
-      <div className="neon-glow-bg w-[200px] h-[200px] sm:w-[380px] sm:h-[380px] bg-fuchsia-500/15 bottom-0 right-0" />
-      <div className="neon-glow-bg w-[160px] h-[160px] sm:w-[300px] sm:h-[300px] bg-indigo-500/10 top-1/3 left-1/2" />
+      <div className="neon-glow-bg w-[220px] h-[220px] sm:w-[420px] sm:h-[420px] bg-purple-300/25 dark:bg-purple-500/20 -top-20 -left-20" />
+      <div className="neon-glow-bg w-[200px] h-[200px] sm:w-[380px] sm:h-[380px] bg-fuchsia-300/20 dark:bg-fuchsia-500/15 bottom-0 right-0" />
+      <div className="neon-glow-bg w-[160px] h-[160px] sm:w-[300px] sm:h-[300px] bg-indigo-300/15 dark:bg-indigo-500/10 top-1/3 left-1/2" />
 
       <div className="relative w-full max-w-3xl">
         <div className="neon-panel rounded-2xl overflow-hidden">
@@ -195,7 +205,7 @@ const NoteEditor = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
               <button
                 onClick={handleBack}
-                className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <ArrowLeft size={16} />
                 Back
@@ -203,13 +213,13 @@ const NoteEditor = () => {
 
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 {isAIGenerated && (
-                  <span className="flex items-center gap-1 text-xs text-fuchsia-300 bg-fuchsia-500/10 border border-fuchsia-500/20 px-2.5 py-1 rounded-full">
+                  <span className="flex items-center gap-1 text-xs text-fuchsia-600 dark:text-fuchsia-300 bg-fuchsia-500/10 border border-fuchsia-500/20 px-2.5 py-1 rounded-full">
                     <Sparkles size={12} />
                     AI Generated
                   </span>
                 )}
                 {activeCollectionName && !isEditing && (
-                  <span className="text-xs text-gray-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
+                  <span className="text-xs text-gray-600 dark:text-gray-400 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2.5 py-1 rounded-full">
                     {activeCollectionName}
                   </span>
                 )}
@@ -217,7 +227,7 @@ const NoteEditor = () => {
                 {!isEditing && (
                   <button
                     onClick={() => setMode('edit')}
-                    className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-200 border border-white/10 bg-white/5 rounded-lg px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/10 bg-black/5 dark:bg-white/5 rounded-lg px-3 sm:px-4 py-2 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                   >
                     <Pencil size={14} />
                     Edit
@@ -229,7 +239,7 @@ const NoteEditor = () => {
                     <button
                       onClick={handleSaveToArchive}
                       disabled={saving}
-                      className="text-xs sm:text-sm font-medium text-gray-300 border border-white/10 bg-white/5 rounded-lg px-3 sm:px-4 py-2 hover:bg-white/10 transition-colors disabled:opacity-50 whitespace-nowrap"
+                      className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 bg-black/5 dark:bg-white/5 rounded-lg px-3 sm:px-4 py-2 hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 whitespace-nowrap"
                     >
                       <span className="hidden sm:inline">Save to </span>Archive
                     </button>
@@ -254,10 +264,10 @@ const NoteEditor = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Untitled"
                 autoFocus={isNew}
-                className="w-full text-2xl sm:text-3xl font-semibold text-white/90 outline-none mb-1 bg-transparent placeholder-white/30"
+                className="w-full text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white/90 outline-none mb-1 bg-transparent placeholder-gray-400 dark:placeholder-white/30"
               />
             ) : (
-              <h1 className="w-full text-2xl sm:text-3xl font-semibold text-white/90 mb-1">{title || 'Untitled'}</h1>
+              <h1 className="w-full text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white/90 mb-1">{title || 'Untitled'}</h1>
             )}
             <div className="neon-underline h-0.5 w-12 rounded-full mb-6" />
 
@@ -265,34 +275,34 @@ const NoteEditor = () => {
               <BlockEditor
                 blocks={blocks}
                 onChange={setBlocks}
-                textColorClass="text-gray-300"
-                mutedColorClass="text-gray-500"
+                textColorClass="text-gray-800 dark:text-gray-300"
+                mutedColorClass="text-gray-500 dark:text-gray-500"
               />
             ) : (
               <BlockViewer
                 content={rawContent}
-                textColorClass="text-gray-300"
-                mutedColorClass="text-gray-500"
+                textColorClass="text-gray-800 dark:text-gray-300"
+                mutedColorClass="text-gray-500 dark:text-gray-500"
               />
             )}
 
             {/* Editing-only tools: link + collection */}
             {isEditing && !isNew && (
-              <div className="mt-6 pt-4 border-t border-white/5 space-y-4">
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/5 space-y-4">
                 <div>
                   <button
                     onClick={() => setCollectionPickerOpen((prev) => !prev)}
-                    className="flex items-center gap-1.5 text-sm text-purple-300 hover:text-purple-200 transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-purple-600 dark:text-purple-300 hover:text-purple-700 dark:hover:text-purple-200 transition-colors"
                   >
                     <FolderInput size={14} />
                     {activeCollectionName ? `In "${activeCollectionName}"` : 'Add to a collection'}
                   </button>
                   {collectionPickerOpen && (
-                    <div className="mt-3 bg-white/5 border border-white/10 rounded-xl p-2 max-w-xs space-y-1">
+                    <div className="mt-3 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-2 max-w-xs space-y-1">
                       {collectionId && (
                         <button
                           onClick={() => handlePickCollection(null)}
-                          className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-white/5"
+                          className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5"
                         >
                           Remove from collection
                         </button>
@@ -302,7 +312,9 @@ const NoteEditor = () => {
                           key={c._id}
                           onClick={() => handlePickCollection(c._id)}
                           className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-lg text-sm ${
-                            collectionId === c._id ? 'bg-purple-500/15 text-purple-200' : 'text-gray-300 hover:bg-white/5'
+                            collectionId === c._id
+                              ? 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-200'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'
                           }`}
                         >
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
@@ -310,7 +322,7 @@ const NoteEditor = () => {
                         </button>
                       ))}
                       {collections.length === 0 && (
-                        <p className="text-xs text-gray-500 px-3 py-2">No collections yet</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 px-3 py-2">No collections yet</p>
                       )}
                     </div>
                   )}
@@ -319,23 +331,23 @@ const NoteEditor = () => {
                 <div>
                   <button
                     onClick={() => setLinkPanelOpen((prev) => !prev)}
-                    className="flex items-center gap-1.5 text-sm text-fuchsia-300 hover:text-fuchsia-200 transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-fuchsia-600 dark:text-fuchsia-300 hover:text-fuchsia-700 dark:hover:text-fuchsia-200 transition-colors"
                   >
                     <Link2 size={14} />
                     {linkedNotes.length > 0 ? `Linked to ${linkedNotes.length} note(s)` : 'Link this note to others'}
                   </button>
 
                   {linkPanelOpen && (
-                    <div className="mt-3 bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="mt-3 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <input
                           type="text"
                           value={linkSearch}
                           onChange={(e) => setLinkSearch(e.target.value)}
                           placeholder="Search notes to link..."
-                          className="flex-1 text-sm bg-white/5 border border-white/10 text-white placeholder-white/30 rounded-lg px-3 py-2 outline-none focus:border-fuchsia-400/50 transition-colors"
+                          className="flex-1 text-sm bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-lg px-3 py-2 outline-none focus:border-fuchsia-400/50 transition-colors"
                         />
-                        <button onClick={() => setLinkPanelOpen(false)} className="text-gray-400 hover:text-white shrink-0">
+                        <button onClick={() => setLinkPanelOpen(false)} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white shrink-0">
                           <X size={16} />
                         </button>
                       </div>
@@ -348,8 +360,8 @@ const NoteEditor = () => {
                               onClick={() => handleToggleLink(n._id)}
                               className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
                                 linkedNotes.includes(n._id)
-                                  ? 'bg-fuchsia-500/15 text-fuchsia-200 border border-fuchsia-500/30'
-                                  : 'hover:bg-white/5 text-gray-300 border border-transparent'
+                                  ? 'bg-fuchsia-100 dark:bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-200 border border-fuchsia-300 dark:border-fuchsia-500/30'
+                                  : 'hover:bg-black/5 dark:hover:bg-white/5 text-gray-700 dark:text-gray-300 border border-transparent'
                               }`}
                             >
                               <span className="truncate">{n.title || 'Untitled'}</span>
@@ -363,7 +375,7 @@ const NoteEditor = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5 text-xs text-gray-500">
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-white/5 text-xs text-gray-500 dark:text-gray-500">
               <span>{isNew ? 'Draft — not saved yet' : saved ? 'Saved just now' : isEditing ? 'Editing' : 'Viewing'}</span>
               <span>{wordCount} words</span>
             </div>

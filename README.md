@@ -35,6 +35,7 @@ The result is a note-taking app with four pillars that don't typically coexist i
 - **Organizational depth** — collections with custom colors, pinning, archiving, soft-delete trash with recovery, and full-text search — all built on top of a single flexible Note schema
 - **Developers Mode** where you can store and analyze your code properly you could convert it to your own respective language along with learning through workflows and commands. 
 - **A production-grade auth & UX layer** — JWT sessions with real expiry checking, multi-account switching on one device, dark mode, customizable greetings/avatars, and a fully responsive layout that adapts from a 4K desktop down to a 360px phone screen with a native-feeling bottom tab bar
+- **Installable PWA** — a real web app manifest, custom app icons, and an auto-updating service worker (via `vite-plugin-pwa`) mean NextGenNote can be installed to a home screen or desktop and launches like a native app, with static assets cached for offline resilience
 
 ---
 
@@ -53,14 +54,17 @@ Glassmorphic split-screen Login and Signup pages, each with a dark animated bran
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/88467357-682a-463a-8be8-0328fa787547" />
 
 ### 3. Dashboard
-The home base. A collapsible sidebar (desktop) or bottom tab bar (mobile) for navigation between All Notes, Starred, Archive, Trash, and custom Collections. Notes render as gradient purple cards, split into **Pinned** and **Other Notes** sections, with a live search bar and a 3/4/5-column density toggle on wide screens.
+The home base. A collapsible sidebar (desktop) or bottom tab bar (mobile) for navigation between All Notes, Starred, Archive, Trash, and custom Collections. Notes are split into **Pinned** and **Other Notes** sections, with a live search bar, a grid/bar layout toggle, and a 2/3/4/5-column density toggle for grid view on wide screens — both preferences persist per-browser via `localStorage`.
 
 <img width="1920" height="1080" alt="Screenshot (1743)" src="https://github.com/user-attachments/assets/0f1ba443-685f-42f5-ab42-c5b03de05856" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8d7bce67-9a54-4723-aa5c-5e2746fb7765" />
 <img width="1920" height="1080" alt="Screenshot (1744)" src="https://github.com/user-attachments/assets/cc8f120e-0d96-425c-8e0b-70a465a00caa" />
 
 ### 4. Developers Mode
-
+A built-in, VS Code–styled code editor and snippet manager (`/devmode`), separate from the note-taking experience. Snippets are stored per-user in their own `CodeSnippet` collection, with a file-tree sidebar, an inline-renameable tab, line numbers, and a live cursor-position/line-count status bar. Three Groq-powered actions run server-side on top of whatever code is in the editor:
+- **Auto language detection** — debounced ~1s after typing stops, so it doesn't fire a model call on every keystroke
+- **Convert** — translates the current snippet into another supported language, shown side-by-side before you choose to apply it
+- **Diagram** — generates a Mermaid.js logic diagram summarizing the code's control flow, rendered inline in a modal
 
 <img width="1048" height="642" alt="image" src="https://github.com/user-attachments/assets/ebce2b5d-012e-4415-882c-19d052d9220d" />
 
@@ -92,7 +96,7 @@ A real-time-feeling activity log: "First note created!", "You pinned a note!", "
 Dark/light mode toggle, notification toggle, a 7-avatar picker, a customizable dashboard greeting (default "Hola"), and a full Profile page with editable display name, account verification badge, and **multi-account switching** — the app remembers every account a user has logged into on that device and lets them swap between them without re-entering a password.
 
 ### 12. Mobile Experience
-Below the `sm` breakpoint, the sidebar disappears entirely in favor of a bottom tab bar (Notes / AI / Alerts / More), with a slide-up sheet for secondary navigation (Starred/Archive/Trash, Workspace, Connecting Thoughts, Settings). The AI Canvas becomes a full-screen sheet through tablet widths. The Connecting Thoughts graph gets a collapsible filter drawer instead of a fixed side panel, and node-dragging supports real touch events, not just mouse.
+Below the `sm` breakpoint, the sidebar disappears entirely in favor of a bottom tab bar (Notes / AI / Alerts / More), with a slide-up sheet for secondary navigation (Starred/Archive/Trash, Workspace, Connecting Thoughts, Developer Mode, Settings). Each collection row in the Workspace list has its own delete control on mobile, matching what's available on the desktop sidebar. The AI Canvas becomes a full-screen sheet through tablet widths. The Connecting Thoughts graph gets a collapsible filter drawer instead of a fixed side panel, and node-dragging supports real touch events, not just mouse.
 
 ---
 
@@ -209,26 +213,33 @@ NextGenNote/
 │   │   ├── collectionController.js   # create/list/delete collections
 │   │   ├── notificationController.js # list/delete/clear notifications
 │   │   ├── userController.js         # profile + settings (avatar, theme, greeting)
-│   │   └── aiController.js           # Groq API call for AI Canvas
+│   │   ├── aiController.js           # Groq API call for AI Canvas
+│   │   └── devModeController.js      # snippet CRUD, language detect, convert, diagram
 │   ├── middleware/
 │   │   └── authMiddleware.js         # JWT verification, attaches req.userId
 │   ├── models/
 │   │   ├── User.js
 │   │   ├── Note.js
 │   │   ├── Collection.js
-│   │   └── Notification.js
+│   │   ├── Notification.js
+│   │   └── CodeSnippet.js            # Developer Mode snippets
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── noteRoutes.js
 │   │   ├── collectionRoutes.js
 │   │   ├── notificationRoutes.js
 │   │   ├── userRoutes.js
-│   │   └── aiRoutes.js
+│   │   ├── aiRoutes.js
+│   │   └── devModeRoutes.js
 │   ├── utils/
 │   │   └── notify.js                 # shared notification-creation helper
 │   ├── .env                          # MONGO_URI, JWT_SECRET, GROQ_API_KEY, PORT
 │   ├── package.json
-│   └── server.js                     # Express app entrypoint
+│   └── server.js                     # Express app entrypoint, incl. GET /health
+│
+├── .github/
+│   └── workflows/
+│       └── keep-alive.yml            # pings /health every 14 min to prevent Render cold starts
 │
 ├── frontend/
 │   ├── src/
@@ -238,13 +249,18 @@ NextGenNote/
 │   │   │   ├── collections.js
 │   │   │   ├── notifications.js
 │   │   │   ├── user.js
-│   │   │   └── ai.js
+│   │   │   ├── ai.js
+│   │   │   └── devmode.js
 │   │   ├── components/
 │   │   │   ├── Sidebar.jsx
-│   │   │   ├── MobileTabBar.jsx
-│   │   │   ├── NoteCard.jsx
+│   │   │   ├── MobileTabBar.jsx      # bottom nav + "More" sheet (Developer Mode, delete collection, etc.)
+│   │   │   ├── NoteCard.jsx          # grid view
+│   │   │   ├── NoteBar.jsx           # bar/list view
 │   │   │   ├── NewNoteCard.jsx
 │   │   │   ├── AICanvas.jsx
+│   │   │   ├── BlockEditor.jsx       # rich block-based note editing
+│   │   │   ├── BlockViewer.jsx       # read-only block rendering
+│   │   │   ├── MermaidDiagram.jsx    # renders Developer Mode's generated diagrams
 │   │   │   ├── ProfileMenu.jsx
 │   │   │   ├── NotificationPanel.jsx
 │   │   │   ├── ConfirmDialog.jsx
@@ -267,7 +283,8 @@ NextGenNote/
 │   │   │   ├── NoteEditor.jsx
 │   │   │   ├── Settings.jsx
 │   │   │   ├── ProfileSettings.jsx
-│   │   │   └── ConnectingThoughts.jsx
+│   │   │   ├── ConnectingThoughts.jsx
+│   │   │   └── DevMode.jsx
 │   │   ├── App.jsx                   # route definitions
 │   │   ├── main.jsx
 │   │   └── index.css                 # Tailwind entry
@@ -305,6 +322,12 @@ userId (ref User), name, color, timestamps
 userId (ref User), message, timestamps
 ```
 
+**CodeSnippet**
+```
+userId (ref User), title (default "Untitled Snippet"), code,
+language (default "plaintext"), timestamps
+```
+
 ---
 
 ## API Reference
@@ -335,8 +358,16 @@ userId (ref User), message, timestamps
 | GET | `/api/user/me` | Get profile + settings |
 | PATCH | `/api/user/settings` | Update avatar/theme/greeting/notifications |
 | POST | `/api/ai/generate` | Generate an AI note from a mood + prompt |
+| GET | `/api/devmode/languages` | List supported languages for Developer Mode |
+| GET / POST | `/api/devmode` | List / create code snippets |
+| GET / PUT / DELETE | `/api/devmode/:id` | Get / update / delete a snippet |
+| POST | `/api/devmode/detect-language` | Auto-detect the language of a code snippet |
+| POST | `/api/devmode/translate` | Convert a snippet from one language to another |
+| POST | `/api/devmode/diagram` | Generate a Mermaid logic diagram from a snippet |
+| GET | `/health` | Lightweight liveness check, no DB call — used by the keep-alive workflow (see below) |
+| GET | `/` | Basic "API is running" check |
 
-All routes except `/auth/*` require a valid `Authorization: Bearer <token>` header.
+All routes except `/auth/*`, `/health`, and `/` require a valid `Authorization: Bearer <token>` header.
 
 ---
 
@@ -356,6 +387,11 @@ GOOGLE_CLIENT_ID=your_google_client_id   # optional, if OAuth is enabled
 VITE_API_URL=http://localhost:5000/api          # local
 VITE_API_URL=https://your-backend.onrender.com/api   # production
 VITE_GOOGLE_CLIENT_ID=your_google_client_id      # optional
+```
+
+**GitHub repository secret** (Settings → Secrets and variables → Actions, not a `.env` file)
+```
+RENDER_BACKEND_URL=https://your-backend.onrender.com   # used by .github/workflows/keep-alive.yml
 ```
 
 ---
@@ -382,6 +418,16 @@ npm run dev         # http://localhost:5173
 - **Frontend**: deployed on Vercel, root directory `frontend`, framework preset Vite, build command `npm run build`, output directory `dist`. `VITE_API_URL` pointed at the live Render backend URL.
 - CORS on the backend is configured to accept requests from the deployed Vercel origin.
 
+### Keeping the backend warm (Render free tier)
+
+Render's free instance type spins down after 15 minutes of inactivity, which otherwise means the first request after idle can take 30-50+ seconds to respond. To avoid that without paying for an always-on plan:
+
+- `GET /health` on the backend is a lightweight, DB-free liveness check
+- `.github/workflows/keep-alive.yml` runs on a GitHub Actions schedule (`*/14 * * * *`) and hits that endpoint, keeping the instance from ever going idle long enough to sleep
+- The ping retries up to 3 times with a 60-second timeout per attempt, so an occasional cold wake (if a scheduled run is ever delayed past the 15-minute window) still succeeds instead of reporting a false failure
+- Requires a `RENDER_BACKEND_URL` repository secret (Settings → Secrets and variables → Actions) set to the live Render URL, e.g. `https://nextgennote-3.onrender.com`
+- GitHub automatically disables scheduled workflows after 60 days with no commits to the repo — if pings ever silently stop, check the Actions tab and re-enable it
+
 ---
 
 ## Responsive Design Notes
@@ -403,7 +449,6 @@ Planned but not yet built:
 - "On this day" note resurfacing
 - Voice-to-note via the browser's native Speech Recognition API
 - Daily writing streak tracking
-- PWA support (installable, offline-capable)
 
 ---
 
